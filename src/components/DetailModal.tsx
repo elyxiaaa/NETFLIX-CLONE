@@ -80,7 +80,7 @@ function ModalContent({
   useEffect(() => {
     let active = true;
     setLoadingSimilar(true);
-    getSimilar(movie.id)
+    getSimilar(movie)
       .then((results) => active && setSimilar(results))
       .catch(() => active && setSimilar([]))
       .finally(() => active && setLoadingSimilar(false));

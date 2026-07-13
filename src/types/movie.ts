@@ -31,6 +31,12 @@ export interface Movie {
   /** TMDB genre ids. Resolve to names with `genreNames()`. */
   genre_ids: number[];
   /**
+   * `"movie"` or `"tv"` — TMDB carries this on `/trending` payloads, and we
+   * infer it elsewhere (movies have `title`, shows have `name`). It picks the
+   * right `/movie` vs `/tv` endpoint for "More Like This" in live mode.
+   */
+  media_type?: "movie" | "tv";
+  /**
    * Optional playback source for the video player. Not part of TMDB's core
    * payload — wire a real stream/trailer URL here per title; the player falls
    * back to a shared sample clip when it's absent.
