@@ -1,0 +1,77 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Defined explicitly (not via an `animate-shimmer` class) so it's never tree-shaken;
+   the `.shimmer` utility below references it directly. */
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-brand-black text-white font-sans antialiased;
+    /* Prevent horizontal scroll from full-bleed hero/rows */
+    overflow-x: hidden;
+  }
+
+  /* Consistent, on-brand keyboard focus ring across every interactive element */
+  :focus-visible {
+    @apply outline-none ring-2 ring-white ring-offset-2 ring-offset-brand-black;
+  }
+}
+
+@layer utilities {
+  /* Horizontally scrollable rows with no visible scrollbar */
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Shimmer sweep overlay for skeletons */
+  .shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+  .shimmer::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.06),
+      transparent
+    );
+    animation: shimmer 1.6s infinite linear;
+  }
+}
+
+/* Motion is state feedback, not decoration — honor the OS preference fully. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  /* Keep skeletons legible without the sweep */
+  .shimmer::after {
+    display: none;
+  }
+}
