@@ -46,10 +46,15 @@ export const requests = {
   fetchOriginals: "/discover/tv?with_networks=213",
   fetchActionMovies: "/discover/movie?with_genres=28",
   fetchComedyMovies: "/discover/movie?with_genres=35",
-  fetchDocumentaries: "/discover/movie?with_genres=99",
   fetchSciFi: "/discover/movie?with_genres=878",
   fetchCrime: "/discover/movie?with_genres=80",
   fetchTopRated: "/movie/top_rated",
+  // TV Shows page
+  fetchTvShows: "/discover/tv?sort_by=popularity.desc",
+  fetchTvCrime: "/discover/tv?with_genres=80",
+  // New & Popular page
+  fetchNewReleases: "/movie/now_playing",
+  fetchPopular: "/movie/popular",
 } as const;
 
 /** Pre-configured axios instance. Every live request inherits the key + language. */

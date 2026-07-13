@@ -12,7 +12,7 @@ export function RowSkeleton({ poster = false }: { poster?: boolean }) {
       <div className="mx-4 h-6 w-52 rounded bg-brand-gray/70 md:mx-12 shimmer" />
       <div className="flex gap-2.5 overflow-hidden px-4 md:px-12">
         {Array.from({ length: 8 }).map((_, i) => (
-          <div key={i} className={`shimmer shrink-0 rounded bg-brand-gray ${card}`} />
+          <div key={i} className={`shimmer shrink-0 rounded-lg bg-brand-gray ${card}`} />
         ))}
       </div>
     </div>

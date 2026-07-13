@@ -8,14 +8,15 @@ export default {
           black: "#000000",
           dark: "#141414",
           gray: "#2a2a2a",
-          red: "#E50914",
-          "red-hover": "#f6121d",
+          gold: "#E5B80B",
+          "gold-hover": "#f4cb3a",
         },
         // "Match %" accent green
         match: "#46d369",
       },
       fontFamily: {
         sans: [
+          "Inter",
           "-apple-system",
           "BlinkMacSystemFont",
           '"Segoe UI"',
@@ -24,6 +25,8 @@ export default {
           "Arial",
           "sans-serif",
         ],
+        // Cinematic display face for the logotype + hero/modal titles.
+        display: ['"Bebas Neue"', "Impact", '"Arial Narrow"', "sans-serif"],
       },
       // Semantic z-index scale (see DESIGN.md) — no arbitrary 9999.
       zIndex: {
@@ -32,6 +35,7 @@ export default {
         "modal-backdrop": "50",
         modal: "60",
         toast: "70",
+        player: "80",
       },
       keyframes: {
         // Skeleton shimmer sweep

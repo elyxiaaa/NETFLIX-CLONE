@@ -34,7 +34,7 @@ glows. Voice is minimal and unfussy: posters and motion do the talking, not chro
 1. **The artwork is the hero.** Chrome is near-invisible; posters and backdrops carry the surface.
 2. **Earned familiarity.** Behaves exactly like a premium streaming app — hover-scale rows, billboard hero,
    detail modal. No reinvented affordances. The tool disappears into the task.
-3. **Cinematic immersion.** Pure blacks, deep gradients, restrained red accent. It should feel
+3. **Cinematic immersion.** Pure blacks, deep gradients, restrained gold accent. It should feel
    like a dark theater, not a web app.
 4. **Motion conveys state.** Hover, reveal, open/close — every animation reports a state change,
    never decoration.

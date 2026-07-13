@@ -10,9 +10,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fontsource/bebas-neue": "^5.2.7",
+    "@fontsource/inter": "^5.2.8",
     "axios": "^1.18.1",
     "react": "^19.2.7",
-    "react-dom": "^19.2.7"
+    "react-dom": "^19.2.7",
+    "react-router-dom": "^7.18.1"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

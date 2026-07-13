@@ -124,16 +124,83 @@ export function BookmarkIcon(props: IconProps) {
   );
 }
 
+// ---- Video player controls ----
+
+export function PauseIcon(props: IconProps) {
+  return (
+    <svg fill="currentColor" {...base(props)}>
+      <path d="M7 4h3v16H7zM14 4h3v16h-3z" />
+    </svg>
+  );
+}
+
+export function VolumeHighIcon(props: IconProps) {
+  return (
+    <svg fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" {...base(props)}>
+      <path d="M4 9v6h4l5 4V5L8 9H4Z" />
+      <path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12" />
+    </svg>
+  );
+}
+
+export function VolumeMuteIcon(props: IconProps) {
+  return (
+    <svg fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" {...base(props)}>
+      <path d="M4 9v6h4l5 4V5L8 9H4Z" />
+      <path d="m17 9 4 6M21 9l-4 6" />
+    </svg>
+  );
+}
+
+export function FullscreenEnterIcon(props: IconProps) {
+  return (
+    <svg fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" {...base(props)}>
+      <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />
+    </svg>
+  );
+}
+
+export function FullscreenExitIcon(props: IconProps) {
+  return (
+    <svg fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" {...base(props)}>
+      <path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5" />
+    </svg>
+  );
+}
+
+export function SkipBackIcon(props: IconProps) {
+  return (
+    <svg fill="currentColor" {...base(props)}>
+      <path d="M11 6.3 4 12l7 5.7v-4.2l7 4.2V6.3l-7 4.2V6.3ZM3 6h1.6v12H3z" />
+    </svg>
+  );
+}
+
+export function SkipForwardIcon(props: IconProps) {
+  return (
+    <svg fill="currentColor" {...base(props)}>
+      <path d="M13 6.3 20 12l-7 5.7v-4.2l-7 4.2V6.3l7 4.2V6.3ZM19.4 6H21v12h-1.6z" />
+    </svg>
+  );
+}
+
+export function ArrowLeftIcon(props: IconProps) {
+  return (
+    <svg fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" {...base(props)}>
+      <path d="M19 12H5M12 19l-7-7 7-7" />
+    </svg>
+  );
+}
+
 /**
  * Brand wordmark. Renders `BRAND_NAME` (from `config.ts`) as a heavy uppercase
- * logotype in the brand red — accessible text, no external font, scales with the
- * parent font-size. Change the product name in one place: `config.ts`.
+ * logotype in the brand accent — accessible text, no external font, scales with
+ * the parent font-size. Change the product name in one place: `config.ts`.
  */
 export function BrandWordmark({ className = "" }: { className?: string }) {
   return (
     <span
-      className={`inline-block select-none font-black uppercase leading-none text-brand-red ${className}`}
-      style={{ letterSpacing: "-0.03em" }}
+      className={`inline-block select-none font-display uppercase leading-none tracking-[0.04em] text-brand-gold ${className}`}
     >
       {BRAND_NAME}
     </span>

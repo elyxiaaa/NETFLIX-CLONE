@@ -1,6 +1,6 @@
-# Reelix
+# NextFlix
 
-**Reelix** is a cinematic, production-quality streaming "Browse" experience built with
+**NextFlix** is a cinematic, production-quality streaming "Browse" experience built with
 **React 19 + TypeScript + Tailwind CSS + Vite**. It ships with a rich mock dataset shaped
 exactly like the TMDB API (using real artwork), so it looks authentic out of the box — and
 swapping in the **live TMDB API** later is a one-flag change.
@@ -18,8 +18,13 @@ swapping in the **live TMDB API** later is a one-flag change.
   (Match %, HD, rating, genres) with quick actions.
 - **Detail modal** — portaled and fully accessible (focus trap, `Esc` / click-scrim to
   close, body-scroll lock), with HD/4K tags and a live **"More Like This"** grid.
-- **My List (watchlist)** — global state persisted to `localStorage`, with a live navbar
-  badge and a teaching empty state.
+- **Full-screen player** — Play opens a Netflix-style player: auto-hiding controls,
+  scrubber, ±10s skip, volume, fullscreen, and keyboard shortcuts. Plays a bundled sample
+  clip; set a title's `video_url` to stream real content.
+- **Search** — an expanding navbar field drives a `/search` results grid, matching by title
+  or genre (debounced; mock filter locally, `/search/multi` when live).
+- **Multi-page** — client-side routing (Home · TV Shows · Movies · New & Popular · Search)
+  with an active-link navbar and a per-route hero + rows.
 - **Sticky navbar** — transparent over the hero, solid + blurred on scroll.
 - **Skeleton loaders** — shimmer placeholders for the hero and rows while data loads.
 - **Graceful image fallback** — any missing/broken artwork becomes a deterministic gradient
@@ -29,7 +34,8 @@ swapping in the **live TMDB API** later is a one-flag change.
 
 ## Tech stack
 
-React 19 · TypeScript (strict) · Tailwind CSS 3 · Vite 8 · Axios
+React 19 · React Router · TypeScript (strict) · Tailwind CSS 3 · Vite 8 · Axios ·
+self-hosted Inter + Bebas Neue (`@fontsource`)
 
 ## Getting started
 
@@ -60,21 +66,31 @@ signature across mock and live modes.
 
 ```
 src/
+├── pages/                   # one component per route
+│   ├── HomePage.tsx         # /        — full browse
+│   ├── TVShowsPage.tsx      # /tv      — series rows
+│   ├── MoviesPage.tsx       # /movies  — film rows
+│   ├── NewPopularPage.tsx   # /new     — fresh & trending
+│   └── SearchPage.tsx       # /search  — results grid
 ├── components/
-│   ├── Navbar.tsx           # sticky nav, transparent → blurred on scroll
+│   ├── Layout.tsx           # app shell: navbar + <Outlet/> + footer + modal + player
+│   ├── Navbar.tsx           # routing links; transparent → blurred on scroll
+│   ├── SearchBox.tsx        # expanding navbar search → /search
 │   ├── Hero.tsx             # billboard hero + HeroSkeleton.tsx
+│   ├── BrowsePage.tsx       # shared hero + rows renderer (used by every page)
 │   ├── MovieRow.tsx         # data-fetching row (loading / error / data)
-│   ├── ScrollRow.tsx        # presentational scroller (shared by rows + My List)
+│   ├── ScrollRow.tsx        # presentational scroller
 │   ├── RowSkeleton.tsx      # shimmer row placeholder
 │   ├── MovieCard.tsx        # hover-scale card + metadata + image fallback
 │   ├── DetailModal.tsx      # accessible portal modal + "More Like This"
+│   ├── WatchPlayer.tsx      # full-screen Netflix-style video player
 │   ├── Footer.tsx
 │   └── icons.tsx            # inline SVG icon set + brand wordmark
 ├── context/
-│   ├── WatchlistContext.tsx # My List state, persisted to localStorage
-│   └── ModalContext.tsx     # currently-open movie
+│   └── ModalContext.tsx     # open detail modal / playing movie
 ├── hooks/
 │   ├── useFetchMovies.ts    # { data, loading, error } with cleanup
+│   ├── useSearch.ts         # debounced title/genre search
 │   └── useScrolled.ts       # navbar background trigger
 ├── services/
 │   ├── api.ts               # axios instance, endpoint map, USE_MOCK switch
@@ -84,8 +100,9 @@ src/
 ├── utils/
 │   ├── images.ts            # buildImageUrl + gradient fallback
 │   └── genres.ts            # genre map, Match %, year helpers
-├── App.tsx                  # composes the page
-└── main.tsx                 # providers + root render
+├── config.ts                # BRAND_NAME — single source for the brand
+├── App.tsx                  # route table
+└── main.tsx                 # BrowserRouter + ModalProvider + root render
 ```
 
 See [`DESIGN.md`](./DESIGN.md) for the visual system and
@@ -93,6 +110,6 @@ See [`DESIGN.md`](./DESIGN.md) for the visual system and
 
 ## Notes
 
-Reelix is a portfolio demo and is **not a real service or affiliated with any streaming
+NextFlix is a portfolio demo and is **not a real service or affiliated with any streaming
 provider**. It uses the TMDB API and image CDN but is not endorsed or certified by TMDB.
 All artwork and titles belong to their respective owners.

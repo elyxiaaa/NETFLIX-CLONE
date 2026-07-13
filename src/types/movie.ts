@@ -30,6 +30,12 @@ export interface Movie {
   vote_average: number;
   /** TMDB genre ids. Resolve to names with `genreNames()`. */
   genre_ids: number[];
+  /**
+   * Optional playback source for the video player. Not part of TMDB's core
+   * payload — wire a real stream/trailer URL here per title; the player falls
+   * back to a shared sample clip when it's absent.
+   */
+  video_url?: string | null;
 }
 
 /**

@@ -14,11 +14,13 @@ import type { ReactNode, KeyboardEvent as ReactKeyboardEvent } from "react";
 import { createPortal } from "react-dom";
 import type { Movie } from "../types/movie";
 import { useModal } from "../context/ModalContext";
-import { useWatchlist } from "../context/WatchlistContext";
 import { getSimilar } from "../services/movies";
 import { buildImageUrl, gradientFromId } from "../utils/images";
 import { genreNames, matchScore, getYear } from "../utils/genres";
-import { PlayIcon, PlusIcon, CheckIcon, ThumbsUpIcon, CloseIcon, StarIcon } from "./icons";
+import { getCardBadge } from "../utils/badges";
+import { PlayIcon, ThumbsUpIcon, CloseIcon, StarIcon } from "./icons";
+import { Button } from "./Button";
+import { Badge } from "./Badge";
 
 const FOCUSABLE =
   'a[href], button:not([disabled]), input, textarea, select, [tabindex]:not([tabindex="-1"])';
@@ -61,17 +63,17 @@ function ModalContent({
 }) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const openerRef = useRef<Element | null>(null);
-  const { isInWatchlist, toggle } = useWatchlist();
+  const { play } = useModal();
 
   const [similar, setSimilar] = useState<Movie[]>([]);
   const [loadingSimilar, setLoadingSimilar] = useState(true);
 
-  const saved = isInWatchlist(movie.id);
   const backdrop =
     buildImageUrl(movie.backdrop_path, "w1280") ?? buildImageUrl(movie.poster_path, "w780");
   const genres = genreNames(movie.genre_ids);
   const year = getYear(movie.release_date);
   const match = matchScore(movie.vote_average, movie.id);
+  const badge = getCardBadge(movie);
   const titleId = `modal-title-${movie.id}`;
 
   // Fetch "More Like This".
@@ -150,25 +152,15 @@ function ModalContent({
           <div className="absolute bottom-0 left-0 space-y-4 p-6 md:p-8">
             <h2
               id={titleId}
-              className="text-balance text-2xl font-black tracking-tight text-white drop-shadow-xl sm:text-4xl"
+              className="text-balance font-display text-4xl uppercase leading-[0.95] tracking-[0.01em] text-white drop-shadow-xl sm:text-5xl"
             >
               {movie.title}
             </h2>
             <div className="flex flex-wrap items-center gap-3">
-              <button
-                type="button"
-                className="inline-flex items-center gap-2 rounded bg-white px-6 py-2 font-semibold text-black transition hover:bg-white/80"
-              >
+              <Button variant="primary" size="lg" onClick={() => play(movie)}>
                 <PlayIcon className="h-5 w-5" />
                 Play
-              </button>
-              <CircleButton
-                label={saved ? "Remove from My List" : "Add to My List"}
-                pressed={saved}
-                onClick={() => toggle(movie)}
-              >
-                {saved ? <CheckIcon className="h-5 w-5" /> : <PlusIcon className="h-5 w-5" />}
-              </CircleButton>
+              </Button>
               <CircleButton label="Rate this title">
                 <ThumbsUpIcon className="h-5 w-5" />
               </CircleButton>
@@ -181,18 +173,15 @@ function ModalContent({
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm">
             <span className="font-semibold text-match">{match}% Match</span>
             {year && <span className="text-white/80">{year}</span>}
-            <span className="rounded border border-white/40 px-1.5 text-xs leading-tight text-white/80">
-              HD
-            </span>
+            {badge && <Badge tone={badge.tone}>{badge.label}</Badge>}
             {movie.vote_average > 0 && (
               <span className="inline-flex items-center gap-1 text-white/80">
                 <StarIcon className="h-4 w-4 text-yellow-400" />
                 {movie.vote_average.toFixed(1)}
               </span>
             )}
-            <span className="rounded-sm bg-white/10 px-1.5 py-0.5 text-xs text-white/70">
-              4K Ultra HD
-            </span>
+            <Badge tone="dark">HD</Badge>
+            <Badge tone="dark">4K Ultra HD</Badge>
           </div>
 
           <p className="max-w-prose leading-relaxed text-white/90">{movie.overview}</p>
@@ -209,7 +198,7 @@ function ModalContent({
             {loadingSimilar ? (
               <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="shimmer aspect-video rounded-md bg-brand-gray" />
+                  <div key={i} className="shimmer aspect-video rounded-lg bg-brand-gray" />
                 ))}
               </div>
             ) : similar.length > 0 ? (
@@ -240,7 +229,7 @@ function SimilarCard({ movie, onSelect }: { movie: Movie; onSelect: () => void }
     <button
       type="button"
       onClick={onSelect}
-      className="group overflow-hidden rounded-md bg-brand-black text-left ring-1 ring-white/5 transition hover:ring-white/20"
+      className="group overflow-hidden rounded-lg bg-brand-black text-left ring-1 ring-white/5 transition hover:ring-brand-gold/60"
     >
       <div className="relative aspect-video w-full">
         {showFallback ? (

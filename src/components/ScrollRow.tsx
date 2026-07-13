@@ -1,7 +1,7 @@
 /**
  * Presentational horizontal row: a heading + a hidden-scrollbar track of cards
  * with edge chevrons. Knows nothing about data fetching, so it's reused by both
- * `MovieRow` (fetched categories) and the "My List" row (from watchlist state).
+ * `MovieRow` (fetched categories) and `BrowsePage`'s lead row (already-fetched data).
  *
  * Vertical padding on the track gives hover-scaled cards room so they aren't
  * clipped by the horizontal scroll container.
@@ -29,7 +29,8 @@ export function ScrollRow({ title, movies, poster = false }: ScrollRowProps) {
 
   return (
     <section className="group/row space-y-1">
-      <h2 className="px-4 text-lg font-semibold text-white/90 md:px-12 md:text-xl">
+      <h2 className="flex items-center gap-2.5 px-4 text-lg font-semibold text-white/90 md:px-12 md:text-xl">
+        <span aria-hidden="true" className="h-5 w-1 rounded-full bg-brand-gold md:h-6" />
         {title}
       </h2>
 

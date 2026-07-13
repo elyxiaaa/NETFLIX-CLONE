@@ -8,12 +8,15 @@ import { buildImageUrl, gradientFromId } from "../utils/images";
 import { genreNames, matchScore, getYear } from "../utils/genres";
 import { useModal } from "../context/ModalContext";
 import { BRAND_NAME } from "../config";
+import { getCardBadge } from "../utils/badges";
 import { PlayIcon, InfoIcon } from "./icons";
+import { Button } from "./Button";
+import { Badge } from "./Badge";
 
 const TV_GENRES = new Set([10759, 10762, 10763, 10764, 10765, 10766, 10767, 10768]);
 
 export function Hero({ movie }: { movie: Movie }) {
-  const { open } = useModal();
+  const { open, play } = useModal();
 
   const backdrop =
     buildImageUrl(movie.backdrop_path, "original") ??
@@ -22,6 +25,7 @@ export function Hero({ movie }: { movie: Movie }) {
   const year = getYear(movie.release_date);
   const match = matchScore(movie.vote_average, movie.id);
   const kind = movie.genre_ids.some((g) => TV_GENRES.has(g)) ? "Series" : "Film";
+  const badge = getCardBadge(movie);
 
   return (
     <section className="relative h-[58vw] max-h-[82vh] min-h-[440px] w-full">
@@ -44,21 +48,21 @@ export function Hero({ movie }: { movie: Movie }) {
       <div className="absolute inset-0 bg-gradient-to-t from-brand-black via-brand-black/10 to-transparent" />
 
       <div className="absolute bottom-[14%] left-4 max-w-xl space-y-4 md:left-12 lg:max-w-2xl">
-        <div className="flex items-center gap-2 text-sm font-medium tracking-wide text-white/80">
-          <span className="text-xl font-black text-brand-red">{BRAND_NAME.charAt(0)}</span>
+        <div className="flex flex-wrap items-center gap-2.5 text-sm font-medium tracking-wide text-white/80">
+          <span className="text-xl font-black text-brand-gold">{BRAND_NAME.charAt(0)}</span>
           <span className="uppercase tracking-[0.3em]">{kind}</span>
+          {badge && <Badge tone={badge.tone}>{badge.label}</Badge>}
         </div>
 
-        <h1 className="text-balance text-4xl font-black tracking-tight text-white drop-shadow-2xl sm:text-5xl md:text-6xl">
+        <h1 className="text-balance font-display text-5xl uppercase leading-[0.92] tracking-[0.01em] text-white drop-shadow-2xl sm:text-6xl md:text-7xl">
           {movie.title}
         </h1>
 
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm font-medium text-white/90">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm font-medium text-white/90">
           <span className="font-semibold text-match">{match}% Match</span>
           {year && <span>{year}</span>}
-          <span className="rounded border border-white/40 px-1.5 text-xs leading-tight text-white/80">
-            HD
-          </span>
+          <Badge tone="dark">HD</Badge>
+          <Badge tone="dark">4K</Badge>
           {genres.length > 0 && (
             <span className="text-white/70">{genres.join(" • ")}</span>
           )}
@@ -68,23 +72,15 @@ export function Hero({ movie }: { movie: Movie }) {
           {movie.overview}
         </p>
 
-        <div className="flex flex-wrap gap-3 pt-1">
-          <button
-            type="button"
-            onClick={() => open(movie)}
-            className="inline-flex items-center gap-2 rounded bg-white px-6 py-2.5 font-semibold text-black transition hover:bg-white/80"
-          >
+        <div className="flex flex-wrap gap-3 pt-2">
+          <Button variant="primary" size="lg" onClick={() => play(movie)}>
             <PlayIcon className="h-5 w-5" />
             Play
-          </button>
-          <button
-            type="button"
-            onClick={() => open(movie)}
-            className="inline-flex items-center gap-2 rounded bg-white/20 px-6 py-2.5 font-semibold text-white backdrop-blur-sm transition hover:bg-white/30"
-          >
+          </Button>
+          <Button variant="secondary" size="lg" onClick={() => open(movie)}>
             <InfoIcon className="h-5 w-5" />
             More Info
-          </button>
+          </Button>
         </div>
       </div>
     </section>

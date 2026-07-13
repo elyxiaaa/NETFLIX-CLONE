@@ -24,7 +24,7 @@
 
   /* Consistent, on-brand keyboard focus ring across every interactive element */
   :focus-visible {
-    @apply outline-none ring-2 ring-white ring-offset-2 ring-offset-brand-black;
+    @apply outline-none ring-2 ring-brand-gold ring-offset-2 ring-offset-brand-black;
   }
 }
 
@@ -36,6 +36,33 @@
   }
   .hide-scrollbar::-webkit-scrollbar {
     display: none;
+  }
+
+  /* Video-player range inputs (scrubber + volume): gold thumb, thin track.
+     The played/level fill is applied inline via a background gradient. */
+  .player-range {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 5px;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+  }
+  .player-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border: none;
+    border-radius: 9999px;
+    background: #e5b80b;
+  }
+  .player-range::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border: none;
+    border-radius: 9999px;
+    background: #e5b80b;
   }
 
   /* Shimmer sweep overlay for skeletons */

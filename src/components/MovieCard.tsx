@@ -3,7 +3,7 @@
  *
  * - Wide (backdrop) by default, or tall `poster` mode.
  * - Hover / keyboard-focus scales it up, lifts it above neighbors, and reveals a
- *   metadata + quick-actions overlay (Play, add/remove from list, more info).
+ *   metadata + quick-actions overlay (Play, more info).
  * - If the artwork is missing or fails to load, falls back to a deterministic
  *   gradient with the title — so a broken image still reads as an intentional card.
  *
@@ -16,14 +16,9 @@ import type { Movie } from "../types/movie";
 import { buildImageUrl, gradientFromId } from "../utils/images";
 import { genreNames, matchScore, getYear } from "../utils/genres";
 import { useModal } from "../context/ModalContext";
-import { useWatchlist } from "../context/WatchlistContext";
-import {
-  PlayIcon,
-  PlusIcon,
-  CheckIcon,
-  InfoIcon,
-  StarIcon,
-} from "./icons";
+import { getCardBadge } from "../utils/badges";
+import { PlayIcon, InfoIcon, StarIcon } from "./icons";
+import { Badge } from "./Badge";
 
 interface MovieCardProps {
   movie: Movie;
@@ -32,11 +27,9 @@ interface MovieCardProps {
 }
 
 export function MovieCard({ movie, poster = false }: MovieCardProps) {
-  const { open } = useModal();
-  const { isInWatchlist, toggle } = useWatchlist();
+  const { open, play } = useModal();
   const [imgFailed, setImgFailed] = useState(false);
 
-  const saved = isInWatchlist(movie.id);
   const path = poster ? movie.poster_path : movie.backdrop_path ?? movie.poster_path;
   const imageUrl = buildImageUrl(path, poster ? "w500" : "w780");
   const showFallback = !imageUrl || imgFailed;
@@ -44,6 +37,7 @@ export function MovieCard({ movie, poster = false }: MovieCardProps) {
   const genres = genreNames(movie.genre_ids, 3);
   const match = matchScore(movie.vote_average, movie.id);
   const year = getYear(movie.release_date);
+  const badge = getCardBadge(movie);
 
   const size = poster
     ? "aspect-[2/3] w-[140px] sm:w-[150px] md:w-[170px]"
@@ -51,9 +45,14 @@ export function MovieCard({ movie, poster = false }: MovieCardProps) {
 
   return (
     <article
-      className={`group relative shrink-0 ${size} rounded-md transition-[transform] duration-200 ease-out-quint hover:z-20 hover:scale-105 focus-within:z-20 focus-within:scale-105`}
+      className={`group relative shrink-0 ${size} rounded-lg transition-[transform] duration-200 ease-out-quint hover:z-20 hover:scale-105 focus-within:z-20 focus-within:scale-105`}
     >
-      <div className="absolute inset-0 overflow-hidden rounded-md bg-brand-gray shadow-md transition-shadow duration-200 group-hover:shadow-2xl group-hover:shadow-black/60 ring-1 ring-white/5">
+      <div className="absolute inset-0 overflow-hidden rounded-lg bg-brand-gray shadow-md ring-1 ring-white/5 transition-all duration-200 group-hover:shadow-2xl group-hover:shadow-black/60 group-hover:ring-2 group-hover:ring-brand-gold/70">
+        {badge && (
+          <div className="pointer-events-none absolute left-2 top-2 z-10">
+            <Badge tone={badge.tone}>{badge.label}</Badge>
+          </div>
+        )}
         {/* Full-card button opens the detail modal */}
         <button
           type="button"
@@ -88,22 +87,15 @@ export function MovieCard({ movie, poster = false }: MovieCardProps) {
           <div className="pointer-events-auto mb-2 flex items-center gap-1.5">
             <IconButton
               label={`Play ${movie.title}`}
-              onClick={() => open(movie)}
-              className="bg-white text-black hover:bg-white/80"
+              onClick={() => play(movie)}
+              className="border-brand-gold bg-brand-gold text-black hover:bg-brand-gold-hover"
             >
               <PlayIcon className="ml-0.5 h-4 w-4" />
             </IconButton>
             <IconButton
-              label={saved ? `Remove ${movie.title} from My List` : `Add ${movie.title} to My List`}
-              pressed={saved}
-              onClick={() => toggle(movie)}
-            >
-              {saved ? <CheckIcon className="h-4 w-4" /> : <PlusIcon className="h-4 w-4" />}
-            </IconButton>
-            <IconButton
               label={`More info about ${movie.title}`}
               onClick={() => open(movie)}
-              className="ml-auto"
+              className="ml-auto text-white"
             >
               <InfoIcon className="h-4 w-4" />
             </IconButton>
@@ -142,24 +134,21 @@ function IconButton({
   label,
   onClick,
   className = "",
-  pressed,
 }: {
   children: ReactNode;
   label: string;
   onClick: () => void;
   className?: string;
-  pressed?: boolean;
 }) {
   return (
     <button
       type="button"
       aria-label={label}
-      aria-pressed={pressed}
       onClick={(e) => {
         e.stopPropagation();
         onClick();
       }}
-      className={`grid h-8 w-8 place-items-center rounded-full border border-white/50 bg-black/40 text-white backdrop-blur transition hover:border-white hover:bg-black/60 ${className}`}
+      className={`grid h-8 w-8 place-items-center rounded-full border border-white/50 bg-black/40 backdrop-blur transition-all duration-200 hover:border-white hover:bg-black/60 active:scale-90 ${className}`}
     >
       {children}
     </button>

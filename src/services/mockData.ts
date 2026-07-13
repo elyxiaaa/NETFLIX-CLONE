@@ -391,75 +391,6 @@ export const CATALOG: Movie[] = [
     genre_ids: [28, 12, 878],
   },
 
-  // ---- Documentaries ----
-  {
-    id: 515001,
-    title: "Free Solo",
-    poster_path: "/wKiOkZTN9lUUUNZLmtnwubZYONg.jpg",
-    backdrop_path: null,
-    overview:
-      "Climber Alex Honnold prepares to achieve his lifelong dream: scaling the 3,000-foot El Capitan in Yosemite without a rope.",
-    release_date: "2018-09-28",
-    vote_average: 7.9,
-    genre_ids: [99],
-  },
-  {
-    id: 705996,
-    title: "My Octopus Teacher",
-    poster_path: "/zI8KZ4EdLUymWKX1YEkpZ0gtPUa.jpg",
-    backdrop_path: null,
-    overview:
-      "A filmmaker forges an unusual and life-changing friendship with an octopus living in a South African kelp forest.",
-    release_date: "2020-09-07",
-    vote_average: 8.1,
-    genre_ids: [99],
-  },
-  {
-    id: 393404,
-    title: "13th",
-    poster_path: "/dpGVSCvxw4ptuIil0TfMhZhy71O.jpg",
-    backdrop_path: null,
-    overview:
-      "An in-depth, powerful look at the U.S. prison system and the way it reveals the nation's history of racial inequality.",
-    release_date: "2016-10-07",
-    vote_average: 7.9,
-    genre_ids: [99],
-  },
-  // These docs have no CDN art on hand — they demonstrate the gradient fallback,
-  // and populate automatically when live TMDB is enabled.
-  {
-    id: 85520,
-    title: "Our Planet",
-    poster_path: null,
-    backdrop_path: null,
-    overview:
-      "Experience the planet's natural beauty and examine how climate change impacts all living creatures in this ambitious documentary of spectacular scope.",
-    release_date: "2019-04-05",
-    vote_average: 8.5,
-    genre_ids: [99, 18],
-  },
-  {
-    id: 664219,
-    title: "The Social Dilemma",
-    poster_path: null,
-    backdrop_path: null,
-    overview:
-      "Tech experts sound the alarm on the dangerous human impact of social networking, the very technology they helped build.",
-    release_date: "2020-01-26",
-    vote_average: 7.6,
-    genre_ids: [99],
-  },
-  {
-    id: 570472,
-    title: "Apollo 11",
-    poster_path: null,
-    backdrop_path: null,
-    overview:
-      "A look at the Apollo 11 mission to land on the moon, assembled entirely from restored archival footage and audio, much of it never before seen.",
-    release_date: "2019-03-01",
-    vote_average: 8.0,
-    genre_ids: [99, 36],
-  },
 ];
 
 /** Fast id → Movie lookup used to compose rows and resolve "similar". */
@@ -470,6 +401,12 @@ const byId: Record<number, Movie> = Object.fromEntries(
 /** Resolve an ordered list of ids into Movie objects (skips any unknown id). */
 const pick = (...ids: number[]): Movie[] =>
   ids.map((id) => byId[id]).filter(Boolean);
+
+/** Catalog sorted for the "New & Popular" page (copies, so CATALOG stays stable). */
+const byNewest = [...CATALOG].sort((a, b) =>
+  b.release_date.localeCompare(a.release_date),
+);
+const byRating = [...CATALOG].sort((a, b) => b.vote_average - a.vote_average);
 
 /**
  * Row datasets, keyed by the endpoint paths in `api.ts` `requests`.
@@ -498,5 +435,14 @@ export const MOCK_ROWS: Record<string, Movie[]> = {
   [requests.fetchComedyMovies]: pick(
     293660, 8363, 18785, 97546, 546554, 106646, 119051, 496243,
   ),
-  [requests.fetchDocumentaries]: pick(515001, 705996, 393404, 85520, 664219, 570472),
+
+  // ---- TV Shows page ----
+  [requests.fetchTvShows]: pick(
+    66732, 93405, 71912, 119051, 82856, 71446, 60574, 1396, 87739,
+  ),
+  [requests.fetchTvCrime]: pick(71446, 1396, 60574, 87739, 93405, 71912),
+
+  // ---- New & Popular page ----
+  [requests.fetchNewReleases]: byNewest.slice(0, 14),
+  [requests.fetchPopular]: byRating.slice(0, 14),
 };

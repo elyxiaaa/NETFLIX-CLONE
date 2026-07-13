@@ -8,6 +8,7 @@
 import type { Movie, TMDBResponse } from "../types/movie";
 import { tmdb, USE_MOCK } from "./api";
 import { CATALOG, MOCK_ROWS } from "./mockData";
+import { genreNames } from "../utils/genres";
 
 /** Simulated network latency (ms) so skeleton loaders are visible in mock mode. */
 const MOCK_LATENCY = 550;
@@ -44,6 +45,32 @@ export async function getSimilar(id: number): Promise<Movie[]> {
   }
   const { data } = await tmdb.get<TMDBResponse>(`/movie/${id}/similar`);
   return normalize(data.results);
+}
+
+/**
+ * Search titles by free text (powers the navbar search + `/search`).
+ * Mock mode matches title or genre name; live mode calls TMDB `/search/multi`.
+ */
+export async function searchMovies(query: string): Promise<Movie[]> {
+  const q = query.trim().toLowerCase();
+  if (!q) return [];
+
+  if (USE_MOCK) {
+    const results = CATALOG.filter((m) => {
+      const inTitle = m.title.toLowerCase().includes(q);
+      const inGenre = genreNames(m.genre_ids).some((g) =>
+        g.toLowerCase().includes(q),
+      );
+      return inTitle || inGenre;
+    });
+    return delayed(results, 300);
+  }
+
+  const { data } = await tmdb.get<TMDBResponse>("/search/multi", {
+    params: { query, include_adult: false },
+  });
+  // Keep only real titles that have artwork to show.
+  return normalize(data.results).filter((m) => m.poster_path || m.backdrop_path);
 }
 
 /**
