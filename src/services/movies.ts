@@ -72,6 +72,146 @@ export async function getSimilar(movie: Movie): Promise<Movie[]> {
   }
 }
 
+/** One billed performer, as shown in the movie page's Cast row. */
+export interface CastMember {
+  id: number;
+  name: string;
+  character: string;
+  profile_path: string | null;
+}
+
+/** A title's full detail payload — core `Movie` fields plus page-only extras. */
+export interface TitleDetails {
+  movie: Movie;
+  /** Marketing tagline (e.g. "Defy the gods."). Empty when TMDB has none. */
+  tagline: string;
+  /** Total runtime in minutes, or `null` when unknown. */
+  runtime: number | null;
+  cast: CastMember[];
+}
+
+/** Raw shape of TMDB's `/{movie|tv}/{id}?append_to_response=credits` response. */
+interface RawDetails {
+  id: number;
+  title?: string;
+  name?: string;
+  overview?: string;
+  backdrop_path?: string | null;
+  poster_path?: string | null;
+  release_date?: string;
+  first_air_date?: string;
+  vote_average?: number;
+  runtime?: number;
+  episode_run_time?: number[];
+  tagline?: string;
+  genres?: { id: number; name: string }[];
+  credits?: { cast?: CastMember[] };
+}
+
+/**
+ * Fetch everything the dedicated movie page needs: the full title plus its
+ * tagline, runtime, and cast. One request via `append_to_response=credits`.
+ *
+ * Mock mode resolves the title from the bundled catalog (no tagline/runtime/cast
+ * there); live mode hits `/movie/{id}` or `/tv/{id}` per `mediaType`.
+ */
+export async function getTitleDetails(
+  mediaType: "movie" | "tv",
+  id: number,
+): Promise<TitleDetails> {
+  if (USE_MOCK) {
+    const movie = CATALOG.find((m) => m.id === id);
+    if (!movie) throw new Error(`Unknown title ${id}`);
+    return { movie, tagline: "", runtime: null, cast: [] };
+  }
+
+  const { data } = await tmdb.get<RawDetails>(`/${mediaType}/${id}`, {
+    params: { append_to_response: "credits" },
+  });
+
+  const movie: Movie = {
+    id: data.id,
+    title: data.title ?? data.name ?? "Untitled",
+    backdrop_path: data.backdrop_path ?? null,
+    poster_path: data.poster_path ?? null,
+    overview: data.overview ?? "",
+    release_date: data.release_date ?? data.first_air_date ?? "",
+    vote_average: data.vote_average ?? 0,
+    genre_ids: (data.genres ?? []).map((g) => g.id),
+    media_type: mediaType,
+  };
+
+  return {
+    movie,
+    tagline: data.tagline ?? "",
+    runtime: data.runtime ?? data.episode_run_time?.[0] ?? null,
+    cast: (data.credits?.cast ?? []).filter((c) => c.name).slice(0, 20),
+  };
+}
+
+/** A single video entry from TMDB's `/{movie|tv}/{id}/videos` response. */
+interface TMDBVideo {
+  key: string;
+  site: string;
+  type: string;
+  official: boolean;
+}
+
+/**
+ * Rank a title's videos and return the best YouTube trailer's key, preferring
+ * an official Trailer, then any Trailer, then a Teaser, then any YouTube clip.
+ */
+function pickTrailer(videos: TMDBVideo[]): string | null {
+  const yt = videos.filter((v) => v.site === "YouTube" && v.key);
+  const score = (v: TMDBVideo) =>
+    (v.type === "Trailer" ? 2 : v.type === "Teaser" ? 1 : 0) +
+    (v.official ? 0.5 : 0);
+  const best = yt.sort((a, b) => score(b) - score(a))[0];
+  return best?.key ?? null;
+}
+
+/**
+ * Resolve a title's trailer to a YouTube video id (for the hero's ambient
+ * background). Returns `null` when no trailer exists.
+ *
+ * Mock mode uses the title's own `trailer_key`. Live mode calls TMDB's
+ * `/videos` endpoint, which — like recommendations — lives under `/movie/{id}`
+ * or `/tv/{id}`; we use `media_type` when known and otherwise probe movie then
+ * tv, swallowing the expected 404 (trending/originals rows mix films and shows).
+ */
+export async function getTrailerKey(movie: Movie): Promise<string | null> {
+  const { id, media_type, trailer_key } = movie;
+
+  if (USE_MOCK) return trailer_key ?? null;
+
+  const fetchFor = async (type: "movie" | "tv"): Promise<string | null> => {
+    const { data } = await tmdb.get<{ results: TMDBVideo[] }>(
+      `/${type}/${id}/videos`,
+    );
+    return pickTrailer(data.results ?? []);
+  };
+
+  if (media_type) {
+    try {
+      return await fetchFor(media_type);
+    } catch {
+      return null;
+    }
+  }
+
+  try {
+    const asMovie = await fetchFor("movie");
+    if (asMovie) return asMovie;
+  } catch {
+    /* not a movie id — fall through to tv */
+  }
+  try {
+    return await fetchFor("tv");
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Search titles by free text (powers the navbar search + `/search`).
  * Mock mode matches title or genre name; live mode calls TMDB `/search/multi`.

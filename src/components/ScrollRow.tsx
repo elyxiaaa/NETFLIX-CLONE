@@ -15,12 +15,16 @@ interface ScrollRowProps {
   title: string;
   movies: Movie[];
   poster?: boolean;
+  /** Show ranked "TOP {n}" badges and cap the track at 10. */
+  numbered?: boolean;
 }
 
-export function ScrollRow({ title, movies, poster = false }: ScrollRowProps) {
+export function ScrollRow({ title, movies, poster = false, numbered = false }: ScrollRowProps) {
   const trackRef = useRef<HTMLUListElement>(null);
 
   if (movies.length === 0) return null;
+
+  const items = numbered ? movies.slice(0, 10) : movies;
 
   const scrollByPage = (direction: 1 | -1) => {
     const el = trackRef.current;
@@ -41,9 +45,13 @@ export function ScrollRow({ title, movies, poster = false }: ScrollRowProps) {
           ref={trackRef}
           className="hide-scrollbar flex gap-2.5 overflow-x-auto scroll-smooth px-4 py-7 md:px-12"
         >
-          {movies.map((movie) => (
+          {items.map((movie, i) => (
             <li key={movie.id} className="flex">
-              <MovieCard movie={movie} poster={poster} />
+              <MovieCard
+                movie={movie}
+                poster={poster}
+                rank={numbered ? i + 1 : undefined}
+              />
             </li>
           ))}
         </ul>

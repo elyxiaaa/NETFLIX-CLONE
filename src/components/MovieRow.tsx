@@ -8,7 +8,7 @@ import { useFetchMovies } from "../hooks/useFetchMovies";
 import { ScrollRow } from "./ScrollRow";
 import { RowSkeleton } from "./RowSkeleton";
 
-export function MovieRow({ title, fetchUrl, poster = false }: MovieRowProps) {
+export function MovieRow({ title, fetchUrl, poster = false, numbered = false }: MovieRowProps) {
   const { data, loading, error } = useFetchMovies(fetchUrl);
 
   if (loading) {
@@ -30,5 +30,5 @@ export function MovieRow({ title, fetchUrl, poster = false }: MovieRowProps) {
     );
   }
 
-  return <ScrollRow title={title} movies={data} poster={poster} />;
+  return <ScrollRow title={title} movies={data} poster={poster} numbered={numbered} />;
 }

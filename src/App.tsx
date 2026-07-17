@@ -10,6 +10,9 @@ import { TVShowsPage } from "./pages/TVShowsPage";
 import { MoviesPage } from "./pages/MoviesPage";
 import { NewPopularPage } from "./pages/NewPopularPage";
 import { SearchPage } from "./pages/SearchPage";
+import { MoviePage } from "./pages/MoviePage";
+import { DiscoverPage } from "./pages/DiscoverPage";
+import { MyListPage } from "./pages/MyListPage";
 
 function App() {
   return (
@@ -20,6 +23,9 @@ function App() {
         <Route path="movies" element={<MoviesPage />} />
         <Route path="new" element={<NewPopularPage />} />
         <Route path="search" element={<SearchPage />} />
+        <Route path="my-list" element={<MyListPage />} />
+        <Route path="browse" element={<DiscoverPage />} />
+        <Route path="watch/:mediaType/:id" element={<MoviePage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>

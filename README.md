@@ -16,11 +16,11 @@ swapping in the **live TMDB API** later is a one-flag change.
   (touch), and titles that overlap between rows like the real thing.
 - **Rich hover cards** — smooth `scale-105`, shadow lift, and a metadata reveal
   (Match %, HD, rating, genres) with quick actions.
-- **Detail modal** — portaled and fully accessible (focus trap, `Esc` / click-scrim to
-  close, body-scroll lock), with HD/4K tags and a live **"More Like This"** grid.
-- **Full-screen player** — Play opens a Netflix-style player: auto-hiding controls,
-  scrubber, ±10s skip, volume, fullscreen, and keyboard shortcuts. Plays a bundled sample
-  clip; set a title's `video_url` to stream real content.
+- **Dedicated title page** — clicking any card or hero routes to `/watch/:mediaType/:id`:
+  an inline streaming player up top, then the title's poster, tagline, runtime/rating,
+  genres, and synopsis, a **Cast** row, and a **You May Also Like** row.
+- **Ambient hero trailer** — the billboard dissolves from its backdrop into the featured
+  title's muted, looping YouTube trailer (resolved from TMDB), with a mute toggle.
 - **Search** — an expanding navbar field drives a `/search` results grid, matching by title
   or genre (debounced; mock filter locally, `/search/multi` when live).
 - **Multi-page** — client-side routing (Home · TV Shows · Movies · New & Popular · Search)
@@ -71,38 +71,36 @@ src/
 │   ├── TVShowsPage.tsx      # /tv      — series rows
 │   ├── MoviesPage.tsx       # /movies  — film rows
 │   ├── NewPopularPage.tsx   # /new     — fresh & trending
-│   └── SearchPage.tsx       # /search  — results grid
+│   ├── SearchPage.tsx       # /search  — results grid
+│   └── MoviePage.tsx        # /watch/:mediaType/:id — player + details + cast + similar
 ├── components/
-│   ├── Layout.tsx           # app shell: navbar + <Outlet/> + footer + modal + player
+│   ├── Layout.tsx           # app shell: navbar + <Outlet/> + footer
 │   ├── Navbar.tsx           # routing links; transparent → blurred on scroll
 │   ├── SearchBox.tsx        # expanding navbar search → /search
-│   ├── Hero.tsx             # billboard hero + HeroSkeleton.tsx
+│   ├── Hero.tsx             # billboard hero + ambient trailer + HeroSkeleton.tsx
 │   ├── BrowsePage.tsx       # shared hero + rows renderer (used by every page)
 │   ├── MovieRow.tsx         # data-fetching row (loading / error / data)
 │   ├── ScrollRow.tsx        # presentational scroller
 │   ├── RowSkeleton.tsx      # shimmer row placeholder
-│   ├── MovieCard.tsx        # hover-scale card + metadata + image fallback
-│   ├── DetailModal.tsx      # accessible portal modal + "More Like This"
-│   ├── WatchPlayer.tsx      # full-screen Netflix-style video player
+│   ├── MovieCard.tsx        # hover-scale card → navigates to the title page
 │   ├── Footer.tsx
 │   └── icons.tsx            # inline SVG icon set + brand wordmark
-├── context/
-│   └── ModalContext.tsx     # open detail modal / playing movie
 ├── hooks/
 │   ├── useFetchMovies.ts    # { data, loading, error } with cleanup
 │   ├── useSearch.ts         # debounced title/genre search
 │   └── useScrolled.ts       # navbar background trigger
 ├── services/
 │   ├── api.ts               # axios instance, endpoint map, USE_MOCK switch
-│   ├── movies.ts            # getRow / getSimilar (mock ↔ live seam)
+│   ├── movies.ts            # getRow / getSimilar / getTitleDetails / getTrailerKey
 │   └── mockData.ts          # TMDB-shaped catalog with real image paths
 ├── types/movie.ts           # Movie, TMDBResponse, MovieRowProps, Genre
 ├── utils/
 │   ├── images.ts            # buildImageUrl + gradient fallback
-│   └── genres.ts            # genre map, Match %, year helpers
+│   ├── genres.ts            # genre map, Match %, year helpers
+│   └── routes.ts            # watchPath() — links to the title page
 ├── config.ts                # BRAND_NAME — single source for the brand
 ├── App.tsx                  # route table
-└── main.tsx                 # BrowserRouter + ModalProvider + root render
+└── main.tsx                 # BrowserRouter + root render
 ```
 
 See [`DESIGN.md`](./DESIGN.md) for the visual system and

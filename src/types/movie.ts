@@ -42,6 +42,13 @@ export interface Movie {
    * back to a shared sample clip when it's absent.
    */
   video_url?: string | null;
+  /**
+   * Optional YouTube video id for the title's trailer, used as the hero's
+   * ambient background. Not on TMDB's core list payloads — resolved on demand
+   * via `getTrailerKey()` (the `/videos` endpoint) in live mode, or carried
+   * here directly for mock data.
+   */
+  trailer_key?: string | null;
 }
 
 /**
@@ -63,8 +70,10 @@ export interface TMDBResponse {
 export interface MovieRowProps {
   title: string;
   fetchUrl: string;
-  /** Render as tall posters instead of wide backdrops (used for the "originals" row). */
+  /** Render as tall posters instead of wide backdrops. */
   poster?: boolean;
+  /** Show ranked "TOP {n}" badges and cap the row at 10 (a "Top 10" row). */
+  numbered?: boolean;
 }
 
 /** TMDB genre reference `{ id, name }`. */

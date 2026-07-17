@@ -192,6 +192,47 @@ export function ArrowLeftIcon(props: IconProps) {
   );
 }
 
+export function HeartIcon({ filled = false, ...props }: IconProps & { filled?: boolean }) {
+  return (
+    <svg
+      fill={filled ? "currentColor" : "none"}
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...base(props)}
+    >
+      <path d="M12 20.5 4.2 12.9a4.7 4.7 0 0 1 0-6.7 4.7 4.7 0 0 1 6.6 0l1.2 1.2 1.2-1.2a4.7 4.7 0 0 1 6.6 0 4.7 4.7 0 0 1 0 6.7L12 20.5Z" />
+    </svg>
+  );
+}
+
+export function FlameIcon(props: IconProps) {
+  return (
+    <svg fill="currentColor" {...base(props)}>
+      <path d="M12.5 2c.4 2.8-1.6 3.9-1.6 6a1.6 1.6 0 0 0 3.1.4C15 9.6 17 11.4 17 14a5 5 0 0 1-10 0c0-2 .9-3.2 1.7-4 0 1.2.6 2 1.5 2 .3-3.4 1.6-4.6 2.3-10Z" />
+    </svg>
+  );
+}
+
+export function FilmIcon(props: IconProps) {
+  return (
+    <svg fill="none" stroke="currentColor" strokeWidth={2} strokeLinejoin="round" {...base(props)}>
+      <rect x="3" y="4" width="18" height="16" rx="2" />
+      <path d="M7.5 4v16M16.5 4v16M3 9.5h4.5M3 14.5h4.5M16.5 9.5H21M16.5 14.5H21" />
+    </svg>
+  );
+}
+
+export function MonitorIcon(props: IconProps) {
+  return (
+    <svg fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" {...base(props)}>
+      <rect x="3" y="4" width="18" height="12" rx="2" />
+      <path d="M8 20h8M12 16v4" />
+    </svg>
+  );
+}
+
 /**
  * Brand wordmark. Renders `BRAND_NAME` (from `config.ts`) as a heavy uppercase
  * logotype in the brand accent — accessible text, no external font, scales with

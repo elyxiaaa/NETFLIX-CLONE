@@ -10,15 +10,12 @@ import "@fontsource/inter/800.css";
 import "@fontsource/bebas-neue/400.css";
 import "./index.css";
 import App from "./App.tsx";
-import { ModalProvider } from "./context/ModalContext";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    {/* Router drives the pages; modal state drives the single DetailModal. */}
+    {/* Router drives every page, including the dedicated title page. */}
     <BrowserRouter>
-      <ModalProvider>
-        <App />
-      </ModalProvider>
+      <App />
     </BrowserRouter>
   </StrictMode>,
 );

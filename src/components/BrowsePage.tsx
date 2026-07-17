@@ -35,7 +35,11 @@ export function BrowsePage({
 
   return (
     <>
-      {loading || !featured ? <HeroSkeleton /> : <Hero movie={featured} />}
+      {loading || !featured ? (
+        <HeroSkeleton />
+      ) : (
+        <Hero key={featured.id} movie={featured} />
+      )}
 
       {/* Rows rise into the hero's lower fade, cinema-style. */}
       <div className="relative z-10 -mt-10 space-y-3 pb-10 sm:-mt-16 md:-mt-24 md:space-y-5">
