@@ -1,6 +1,6 @@
-# NextFlix
+# Flixly
 
-**NextFlix** is a cinematic, production-quality streaming "Browse" experience built with
+**Flixly** is a cinematic, production-quality streaming "Browse" experience built with
 **React 19 + TypeScript + Tailwind CSS + Vite**. It ships with a rich mock dataset shaped
 exactly like the TMDB API (using real artwork), so it looks authentic out of the box — and
 swapping in the **live TMDB API** later is a one-flag change.
@@ -110,6 +110,6 @@ See [`DESIGN.md`](./DESIGN.md) for the visual system and
 
 ## Notes
 
-NextFlix is a portfolio demo and is **not a real service or affiliated with any streaming
+Flixly is a portfolio demo and is **not a real service or affiliated with any streaming
 provider**. It uses the TMDB API and image CDN but is not endorsed or certified by TMDB.
 All artwork and titles belong to their respective owners.

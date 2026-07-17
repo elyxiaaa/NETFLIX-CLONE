@@ -1,6 +1,6 @@
 # Design
 
-Visual system for the NextFlix streaming UI. Cinematic dark mode; the artwork is the hero, chrome recedes.
+Visual system for the Flixly streaming UI. Cinematic dark mode; the artwork is the hero, chrome recedes.
 
 ## Theme
 
