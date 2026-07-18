@@ -1,10 +1,10 @@
 /**
- * Dedicated title page at `/watch/:mediaType/:id`.
+ * Dedicated title page at `/watch/:mediaType/:id` — the replacement for the old
+ * detail modal + full-screen player.
  *
- * A full-bleed cinematic hero plays the title's trailer (muted, looping); the
- * viewer clicks **Play** to swap in the full streaming player (cinesrc embed).
- * Below: for series, an **Episodes** browser (season picker + episode list);
- * then **Cast** and **You May Also Like**.
+ * Top: the streaming player (cinesrc embed) inline. Below it: the title's
+ * details (poster, tagline, meta, genres, synopsis), a **Cast** row, and a
+ * **You May Also Like** row. Cards here navigate to their own page.
  *
  * Rendering is progressive: when arrived via a card click, the clicked `Movie`
  * rides along in router state so the hero paints instantly, then `getTitleDetails`
@@ -70,13 +70,9 @@ function formatRuntime(minutes: number | null): string | null {
   return h > 0 ? `${h}h ${m}m` : `${m}m`;
 }
 
-/** A thin `·` metadata separator. */
-function Dot() {
-  return (
-    <span aria-hidden className="text-white/30">
-      ·
-    </span>
-  );
+/** Build the cinesrc embed URL for a title from its media type + TMDB id. */
+function embedUrl(mediaType: MediaType, id: number): string {
+  return `https://cinesrc.st/embed/${mediaType}/${id}`;
 }
 
 export function MoviePage() {
