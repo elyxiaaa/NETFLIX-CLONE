@@ -80,6 +80,24 @@ export interface CastMember {
   profile_path: string | null;
 }
 
+/** A season a series offers (for the episode picker). Specials (0) excluded. */
+export interface SeasonSummary {
+  season_number: number;
+  name: string;
+  episode_count: number;
+}
+
+/** A single episode within a season. */
+export interface Episode {
+  id: number;
+  episode_number: number;
+  name: string;
+  overview: string;
+  still_path: string | null;
+  runtime: number | null;
+  air_date: string;
+}
+
 /** A title's full detail payload — core `Movie` fields plus page-only extras. */
 export interface TitleDetails {
   movie: Movie;
@@ -88,9 +106,13 @@ export interface TitleDetails {
   /** Total runtime in minutes, or `null` when unknown. */
   runtime: number | null;
   cast: CastMember[];
+  /** YouTube trailer key for the hero preview, or `null`. */
+  trailerKey: string | null;
+  /** Series seasons (empty for movies). */
+  seasons: SeasonSummary[];
 }
 
-/** Raw shape of TMDB's `/{movie|tv}/{id}?append_to_response=credits` response. */
+/** Raw shape of TMDB's `/{movie|tv}/{id}?append_to_response=credits,videos`. */
 interface RawDetails {
   id: number;
   title?: string;
@@ -106,14 +128,17 @@ interface RawDetails {
   tagline?: string;
   genres?: { id: number; name: string }[];
   credits?: { cast?: CastMember[] };
+  videos?: { results?: TMDBVideo[] };
+  seasons?: { season_number: number; name: string; episode_count: number }[];
 }
 
 /**
- * Fetch everything the dedicated movie page needs: the full title plus its
- * tagline, runtime, and cast. One request via `append_to_response=credits`.
+ * Fetch everything the title page needs in one request: the full title plus its
+ * tagline, runtime, cast, trailer, and (for series) seasons — via
+ * `append_to_response=credits,videos`.
  *
- * Mock mode resolves the title from the bundled catalog (no tagline/runtime/cast
- * there); live mode hits `/movie/{id}` or `/tv/{id}` per `mediaType`.
+ * Mock mode resolves the title from the bundled catalog (extras are empty);
+ * live mode hits `/movie/{id}` or `/tv/{id}` per `mediaType`.
  */
 export async function getTitleDetails(
   mediaType: "movie" | "tv",
@@ -122,11 +147,18 @@ export async function getTitleDetails(
   if (USE_MOCK) {
     const movie = CATALOG.find((m) => m.id === id);
     if (!movie) throw new Error(`Unknown title ${id}`);
-    return { movie, tagline: "", runtime: null, cast: [] };
+    return {
+      movie,
+      tagline: "",
+      runtime: null,
+      cast: [],
+      trailerKey: movie.trailer_key ?? null,
+      seasons: [],
+    };
   }
 
   const { data } = await tmdb.get<RawDetails>(`/${mediaType}/${id}`, {
-    params: { append_to_response: "credits" },
+    params: { append_to_response: "credits,videos" },
   });
 
   const movie: Movie = {
@@ -146,6 +178,73 @@ export async function getTitleDetails(
     tagline: data.tagline ?? "",
     runtime: data.runtime ?? data.episode_run_time?.[0] ?? null,
     cast: (data.credits?.cast ?? []).filter((c) => c.name).slice(0, 20),
+    trailerKey: pickTrailer(data.videos?.results ?? []),
+    seasons: (data.seasons ?? [])
+      .filter((s) => s.season_number >= 1 && s.episode_count > 0)
+      .map((s) => ({
+        season_number: s.season_number,
+        name: s.name || `Season ${s.season_number}`,
+        episode_count: s.episode_count,
+      })),
+  };
+}
+
+/** Fetch a series season's episodes (empty in mock mode — no episode data). */
+export async function getSeasonEpisodes(
+  tvId: number,
+  seasonNumber: number,
+): Promise<Episode[]> {
+  if (USE_MOCK) return [];
+
+  const { data } = await tmdb.get<{
+    episodes?: {
+      id: number;
+      episode_number: number;
+      name?: string;
+      overview?: string;
+      still_path?: string | null;
+      runtime?: number | null;
+      air_date?: string;
+    }[];
+  }>(`/tv/${tvId}/season/${seasonNumber}`);
+
+  return (data.episodes ?? []).map((e) => ({
+    id: e.id,
+    episode_number: e.episode_number,
+    name: e.name || `Episode ${e.episode_number}`,
+    overview: e.overview ?? "",
+    still_path: e.still_path ?? null,
+    runtime: e.runtime ?? null,
+    air_date: e.air_date ?? "",
+  }));
+}
+
+/** One page of a list endpoint, for infinite scroll. */
+export interface MoviesPage {
+  results: Movie[];
+  page: number;
+  totalPages: number;
+}
+
+/**
+ * Fetch one page of a list/discover endpoint. Appends `&page=N` to `fetchUrl`.
+ * Mock mode returns the whole bundled row as a single page.
+ */
+export async function getPage(fetchUrl: string, page: number): Promise<MoviesPage> {
+  if (USE_MOCK) {
+    return {
+      results: page === 1 ? MOCK_ROWS[fetchUrl] ?? [] : [],
+      page: 1,
+      totalPages: 1,
+    };
+  }
+  const sep = fetchUrl.includes("?") ? "&" : "?";
+  const { data } = await tmdb.get<TMDBResponse>(`${fetchUrl}${sep}page=${page}`);
+  return {
+    results: normalize(data.results ?? []),
+    page: data.page ?? page,
+    // TMDB caps discover paging at 500.
+    totalPages: Math.min(data.total_pages ?? 1, 500),
   };
 }
 

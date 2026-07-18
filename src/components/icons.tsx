@@ -207,6 +207,24 @@ export function HeartIcon({ filled = false, ...props }: IconProps & { filled?: b
   );
 }
 
+export function ShareIcon(props: IconProps) {
+  return (
+    <svg fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" {...base(props)}>
+      <path d="M12 3v13M8.5 6.5 12 3l3.5 3.5" />
+      <path d="M7 11H5v9h14v-9h-2" />
+    </svg>
+  );
+}
+
+export function SparklesIcon(props: IconProps) {
+  return (
+    <svg fill="currentColor" {...base(props)}>
+      <path d="M12 2.5l1.6 4.4 4.4 1.6-4.4 1.6L12 14.5l-1.6-4.4L6 8.5l4.4-1.6L12 2.5Z" />
+      <path d="M18.5 14l.9 2.4 2.4.9-2.4.9-.9 2.4-.9-2.4-2.4-.9 2.4-.9.9-2.4Z" />
+    </svg>
+  );
+}
+
 export function FlameIcon(props: IconProps) {
   return (
     <svg fill="currentColor" {...base(props)}>

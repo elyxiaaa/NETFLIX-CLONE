@@ -3,13 +3,16 @@
  *
  * Driven entirely by query params so one page backs every entry in the navbar's
  * Browse mega-menu — a genre id, an original-language filter, or both. It builds
- * a TMDB `/discover` request and renders the results as a poster grid.
+ * a TMDB `/discover` request and renders the results as a poster grid that loads
+ * more automatically as you reach the bottom (infinite scroll).
  *
  * (Live mode only returns real results here; the bundled mock data is keyed to
  * the fixed browse rows, so ad-hoc discover queries show the empty state.)
  */
+import { useCallback, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
-import { useFetchMovies } from "../hooks/useFetchMovies";
+import { getPage } from "../services/movies";
+import { useInfiniteMovies } from "../hooks/useInfiniteMovies";
 import { MovieCard } from "../components/MovieCard";
 
 export function DiscoverPage() {
@@ -20,13 +23,40 @@ export function DiscoverPage() {
   const lang = params.get("lang");
   const title = params.get("title") ?? "Browse";
 
-  // Build the discover query; a stable string keys the fetch/cache.
   const query = new URLSearchParams({ sort_by: "popularity.desc" });
   if (genre) query.set("with_genres", genre);
   if (lang) query.set("with_original_language", lang);
   const fetchUrl = `/discover/${type}?${query.toString()}`;
 
-  const { data, loading, error } = useFetchMovies(fetchUrl);
+  // Keyed on the query so a new category mounts a fresh infinite list.
+  return <DiscoverGrid key={fetchUrl} fetchUrl={fetchUrl} title={title} type={type} />;
+}
+
+function DiscoverGrid({
+  fetchUrl,
+  title,
+  type,
+}: {
+  fetchUrl: string;
+  title: string;
+  type: "movie" | "tv";
+}) {
+  const fetchPage = useCallback((page: number) => getPage(fetchUrl, page), [fetchUrl]);
+  const { items, initialLoading, loadingMore, hasMore, error, loadMore } =
+    useInfiniteMovies(fetchPage);
+
+  // Load the next page when the sentinel nears the viewport.
+  const sentinel = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = sentinel.current;
+    if (!el || !hasMore) return;
+    const observer = new IntersectionObserver(
+      (entries) => entries[0]?.isIntersecting && loadMore(),
+      { rootMargin: "800px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [loadMore, hasMore]);
 
   return (
     <div className="min-h-screen px-4 pb-16 pt-24 md:px-12 md:pt-28">
@@ -36,16 +66,31 @@ export function DiscoverPage() {
         <span className="text-white/40">· {type === "tv" ? "Series" : "Movies"}</span>
       </h1>
 
-      {loading ? (
+      {initialLoading ? (
         <PosterGridSkeleton />
-      ) : error ? (
-        <p className="text-white/60">Couldn&apos;t load this category. {error}</p>
-      ) : data.length > 0 ? (
-        <div className="flex flex-wrap gap-x-3 gap-y-6">
-          {data.map((movie) => (
-            <MovieCard key={movie.id} movie={movie} poster />
-          ))}
-        </div>
+      ) : error && items.length === 0 ? (
+        <p className="text-white/60">Couldn&apos;t load this category. Please try again.</p>
+      ) : items.length > 0 ? (
+        <>
+          <div className="flex flex-wrap gap-x-3 gap-y-6">
+            {items.map((movie) => (
+              <MovieCard key={movie.id} movie={movie} poster />
+            ))}
+          </div>
+
+          {/* Sentinel + loading affordance for the next page */}
+          <div ref={sentinel} className="h-10" aria-hidden />
+          {loadingMore && (
+            <div className="flex justify-center py-6">
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/20 border-t-brand-gold" />
+            </div>
+          )}
+          {!hasMore && (
+            <p className="py-8 text-center text-sm text-white/30">
+              You&apos;ve reached the end.
+            </p>
+          )}
+        </>
       ) : (
         <p className="text-white/60">
           No titles found for this category. Try another from the Browse menu.
