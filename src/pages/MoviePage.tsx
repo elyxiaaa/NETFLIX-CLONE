@@ -167,7 +167,9 @@ function PlayerFrame({ src, title }: { src: string; title: string }) {
         type="button"
         onClick={isFull ? exitFullscreen : enterFullscreen}
         aria-label={isFull ? "Exit fullscreen" : "Enter fullscreen"}
-        className="absolute right-4 top-[80px] z-20 grid h-11 w-11 place-items-center rounded-full bg-black/50 text-white ring-1 ring-white/20 backdrop-blur transition hover:bg-black/70 active:scale-95 md:right-8"
+        // Overlaid directly on top of the embedded player's own fullscreen
+        // control (bottom-right) so users see a single, reliable button.
+        className="absolute bottom-10 right-4 z-20 grid h-11 w-11 place-items-center rounded-full bg-black/60 text-white ring-1 ring-white/20 backdrop-blur transition hover:bg-black/80 active:scale-95"
       >
         {isFull ? (
           <FullscreenExitIcon className="h-5 w-5" />
