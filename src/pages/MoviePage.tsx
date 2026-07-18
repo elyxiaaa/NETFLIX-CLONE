@@ -2,7 +2,7 @@
  * Dedicated title page at `/watch/:mediaType/:id` — the replacement for the old
  * detail modal + full-screen player.
  *
- * Top: the streaming player (cinesrc embed) inline. Below it: the title's
+ * Top: the streaming player (zxcstream embed) inline. Below it: the title's
  * details (poster, tagline, meta, genres, synopsis), a **Cast** row, and a
  * **You May Also Like** row. Cards here navigate to their own page.
  *
@@ -36,9 +36,18 @@ function formatRuntime(minutes: number | null): string | null {
   return h > 0 ? `${h}h ${m}m` : `${m}m`;
 }
 
-/** Build the cinesrc embed URL for a title from its media type + TMDB id. */
+/**
+ * Build the zxcstream player URL for a title from its media type + TMDB id.
+ * Themed with our brand gold (`E5B80B`) and autoplay on. Series have no
+ * episode selector yet, so TV titles default to episode 1.
+ */
 function embedUrl(mediaType: MediaType, id: number): string {
-  return `https://cinesrc.st/embed/${mediaType}/${id}`;
+  const params = "color=E5B80B&autoplay=true";
+  const path =
+    mediaType === "tv"
+      ? `https://zxcstream.xyz/player/tv/${id}/1`
+      : `https://zxcstream.xyz/player/movie/${id}`;
+  return `${path}?${params}`;
 }
 
 export function MoviePage() {
