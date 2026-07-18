@@ -2,7 +2,7 @@
  * Dedicated title page at `/watch/:mediaType/:id` — the replacement for the old
  * detail modal + full-screen player.
  *
- * Top: the streaming player (cinesrc embed) inline. Below it: the title's
+ * Top: the streaming player (zxcstream embed) inline. Below it: the title's
  * details (poster, tagline, meta, genres, synopsis), a **Cast** row, and a
  * **You May Also Like** row. Cards here navigate to their own page.
  *
@@ -38,12 +38,16 @@ import {
   VolumeMuteIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  FullscreenEnterIcon,
+  FullscreenExitIcon,
 } from "../components/icons";
 
-const EMBED_BASE = "https://cinesrc.st/embed";
-const movieEmbed = (id: number) => `${EMBED_BASE}/movie/${id}`;
+const EMBED_BASE = "https://zxcstream.xyz/player";
+// Theme the player with our brand gold and start playback automatically.
+const PLAYER_PARAMS = "color=E5B80B&autoplay=true";
+const movieEmbed = (id: number) => `${EMBED_BASE}/movie/${id}?${PLAYER_PARAMS}`;
 const tvEmbed = (id: number, season: number, episode: number) =>
-  `${EMBED_BASE}/tv/${id}/${season}/${episode}`;
+  `${EMBED_BASE}/tv/${id}/${season}/${episode}?${PLAYER_PARAMS}`;
 
 /** Ambient YouTube trailer embed (autoplay, looped, no chrome). */
 function trailerEmbedUrl(key: string, muted: boolean): string {
@@ -62,6 +66,119 @@ function trailerEmbedUrl(key: string, muted: boolean): string {
   return `https://www.youtube.com/embed/${key}?${params.toString()}`;
 }
 
+/** Fullscreen-capable element/document, incl. the WebKit-prefixed variants. */
+type FsElement = HTMLDivElement & {
+  webkitRequestFullscreen?: () => Promise<void> | void;
+};
+type FsDocument = Document & {
+  webkitFullscreenElement?: Element | null;
+  webkitExitFullscreen?: () => Promise<void> | void;
+};
+
+/**
+ * The streaming iframe plus a reliable fullscreen control overlaid on it.
+ *
+ * A cross-origin iframe can't trigger fullscreen from its *own* button on
+ * mobile — iOS Safari has no Fullscreen API for iframes at all, so the player's
+ * button silently fails there. Our overlay button instead:
+ *   1. requests native fullscreen on the wrapper (works on Android/desktop), and
+ *   2. falls back to a CSS full-viewport expand (fixed inset-0 + scroll lock)
+ *      when the API is unavailable — the iOS path — so mobile still fills the screen.
+ */
+function PlayerFrame({ src, title }: { src: string; title: string }) {
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const [cssFull, setCssFull] = useState(false);
+  const [nativeFull, setNativeFull] = useState(false);
+  const isFull = cssFull || nativeFull;
+
+  // Keep our toggle in sync when the user exits native fullscreen via ESC or a
+  // system gesture.
+  useEffect(() => {
+    const doc = document as FsDocument;
+    const onChange = () =>
+      setNativeFull(
+        Boolean(doc.fullscreenElement ?? doc.webkitFullscreenElement),
+      );
+    document.addEventListener("fullscreenchange", onChange);
+    document.addEventListener("webkitfullscreenchange", onChange);
+    return () => {
+      document.removeEventListener("fullscreenchange", onChange);
+      document.removeEventListener("webkitfullscreenchange", onChange);
+    };
+  }, []);
+
+  // In the CSS (iOS) fallback: lock page scroll and let ESC exit.
+  useEffect(() => {
+    if (!cssFull) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setCssFull(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [cssFull]);
+
+  const enterFullscreen = async () => {
+    const el = wrapRef.current as FsElement | null;
+    if (!el) return;
+    const request = el.requestFullscreen ?? el.webkitRequestFullscreen;
+    if (request) {
+      try {
+        await request.call(el);
+        return;
+      } catch {
+        /* fall through to the CSS fallback */
+      }
+    }
+    setCssFull(true); // iOS Safari: no iframe fullscreen — emulate it.
+  };
+
+  const exitFullscreen = async () => {
+    const doc = document as FsDocument;
+    if (nativeFull) {
+      const exit = doc.exitFullscreen ?? doc.webkitExitFullscreen;
+      try {
+        await exit?.call(doc);
+      } catch {
+        /* ignore */
+      }
+    }
+    setCssFull(false);
+  };
+
+  return (
+    <div
+      ref={wrapRef}
+      className={isFull ? "fixed inset-0 z-[100] bg-black" : "absolute inset-0 bg-black"}
+    >
+      <iframe
+        key={src}
+        src={src}
+        title={title}
+        className="h-full w-full border-0"
+        allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+        allowFullScreen
+      />
+      <button
+        type="button"
+        onClick={isFull ? exitFullscreen : enterFullscreen}
+        aria-label={isFull ? "Exit fullscreen" : "Enter fullscreen"}
+        className="absolute right-4 top-[80px] z-20 grid h-11 w-11 place-items-center rounded-full bg-black/50 text-white ring-1 ring-white/20 backdrop-blur transition hover:bg-black/70 active:scale-95 md:right-8"
+      >
+        {isFull ? (
+          <FullscreenExitIcon className="h-5 w-5" />
+        ) : (
+          <FullscreenEnterIcon className="h-5 w-5" />
+        )}
+      </button>
+    </div>
+  );
+}
+
 /** Format a runtime in minutes as `2h 53m` (or `48m` under an hour). */
 function formatRuntime(minutes: number | null): string | null {
   if (!minutes || minutes <= 0) return null;
@@ -70,9 +187,13 @@ function formatRuntime(minutes: number | null): string | null {
   return h > 0 ? `${h}h ${m}m` : `${m}m`;
 }
 
-/** Build the cinesrc embed URL for a title from its media type + TMDB id. */
-function embedUrl(mediaType: MediaType, id: number): string {
-  return `https://cinesrc.st/embed/${mediaType}/${id}`;
+/** A faint "·" separator between inline meta items (rating · year · runtime). */
+function Dot() {
+  return (
+    <span aria-hidden className="text-white/30">
+      ·
+    </span>
+  );
 }
 
 export function MoviePage() {
@@ -252,14 +373,7 @@ function TitleHero({
     <section className="relative h-[78vh] min-h-[520px] w-full overflow-hidden bg-brand-black">
       {/* Background: full stream while playing, else backdrop + ambient trailer */}
       {playing ? (
-        <iframe
-          key={streamUrl}
-          src={streamUrl}
-          title={`Playing ${movie.title}`}
-          className="absolute inset-0 h-full w-full border-0"
-          allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
-          allowFullScreen
-        />
+        <PlayerFrame src={streamUrl} title={`Playing ${movie.title}`} />
       ) : (
         <>
           {backdrop ? (
