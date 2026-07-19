@@ -24,6 +24,7 @@ import { getTitleDetails, getSimilar, getSeasonEpisodes } from "../services/movi
 import { buildImageUrl, gradientFromId } from "../utils/images";
 import { genreNames, getYear } from "../utils/genres";
 import { watchPath, type MediaType } from "../utils/routes";
+import { maybeOpenSponsor } from "../utils/ads";
 import { FavoriteButton } from "../components/FavoriteButton";
 import { toggleWatchlist, useIsInWatchlist } from "../hooks/useWatchlist";
 import {
@@ -49,7 +50,13 @@ const movieEmbed = (id: number) => `${EMBED_BASE}/movie/${id}?${PLAYER_PARAMS}`;
 const tvEmbed = (id: number, season: number, episode: number) =>
   `${EMBED_BASE}/tv/${id}/${season}/${episode}?${PLAYER_PARAMS}`;
 
-/** Ambient YouTube trailer embed (autoplay, looped, no chrome). */
+/**
+ * Ambient YouTube trailer embed (autoplay, looped, no chrome).
+ *
+ * `start` jumps past the trailer's intro — the MPA green "approved for
+ * appropriate audiences" band and studio logos run in the first ~10s — so the
+ * hero opens on actual footage instead of the rating card.
+ */
 function trailerEmbedUrl(key: string, muted: boolean): string {
   const params = new URLSearchParams({
     autoplay: "1",
@@ -57,6 +64,7 @@ function trailerEmbedUrl(key: string, muted: boolean): string {
     controls: "0",
     loop: "1",
     playlist: key,
+    start: "10",
     playsinline: "1",
     modestbranding: "1",
     rel: "0",
@@ -263,11 +271,13 @@ function TitleView({
   const genres = useMemo(() => (movie ? genreNames(movie.genre_ids) : []), [movie]);
 
   const startPlay = useCallback(() => {
+    maybeOpenSponsor();
     setPlaying(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
   const playEpisode = useCallback((season: number, episode: number) => {
+    maybeOpenSponsor();
     setActive({ season, episode });
     setPlaying(true);
     window.scrollTo({ top: 0, behavior: "smooth" });

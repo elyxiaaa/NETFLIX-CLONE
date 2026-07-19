@@ -12,6 +12,7 @@ import type { Movie } from "../types/movie";
 import { buildImageUrl, gradientFromId } from "../utils/images";
 import { genreNames, matchScore, getYear } from "../utils/genres";
 import { watchPath } from "../utils/routes";
+import { maybeOpenSponsor } from "../utils/ads";
 import { getTrailerKey } from "../services/movies";
 import { BRAND_NAME } from "../config";
 import { getCardBadge } from "../utils/badges";
@@ -33,6 +34,7 @@ function trailerEmbedUrl(key: string, muted: boolean): string {
     controls: "0",
     loop: "1",
     playlist: key,
+    start: "10", // skip the MPA green band + studio logos at the trailer's start
     playsinline: "1",
     modestbranding: "1",
     rel: "0",
@@ -44,7 +46,10 @@ function trailerEmbedUrl(key: string, muted: boolean): string {
 
 export function Hero({ movie }: { movie: Movie }) {
   const navigate = useNavigate();
-  const openTitle = () => navigate(watchPath(movie), { state: { movie } });
+  const openTitle = () => {
+    maybeOpenSponsor();
+    navigate(watchPath(movie), { state: { movie } });
+  };
 
   const [trailerKey, setTrailerKey] = useState<string | null>(null);
   const [trailerReady, setTrailerReady] = useState(false);
