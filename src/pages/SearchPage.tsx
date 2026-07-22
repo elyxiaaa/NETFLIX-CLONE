@@ -1,8 +1,9 @@
-/** Search results (`/search?q=…`) — a poster grid driven by the navbar search. */
+/** Search results (`/search?q=…`) — a poster grid driven by the search field. */
+import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useSearch } from "../hooks/useSearch";
 import { MovieCard } from "../components/MovieCard";
-import { SearchIcon } from "../components/icons";
+import { SearchIcon, CloseIcon } from "../components/icons";
 
 export function SearchPage() {
   const [params] = useSearchParams();
@@ -12,6 +13,13 @@ export function SearchPage() {
 
   return (
     <div className="min-h-screen px-4 pb-16 pt-24 md:px-12 md:pt-28">
+      {/* Phones drive search from here rather than the navbar: this is a real,
+          always-present input the user taps directly, so the on-screen keyboard
+          opens natively. (iOS Safari only raises the keyboard for a focus() call
+          inside the user gesture, which the navbar's expand animation can't do.)
+          Desktop keeps using the navbar box, so this is hidden from md up. */}
+      <SearchField className="mb-7 md:hidden" />
+
       {!hasQuery ? (
         <EmptyPrompt />
       ) : (
@@ -41,6 +49,64 @@ export function SearchPage() {
             </p>
           )}
         </>
+      )}
+    </div>
+  );
+}
+
+/**
+ * The page's own search field, kept in sync with `?q=`.
+ *
+ * `text-base` (16px) is deliberate — iOS Safari auto-zooms the whole page when
+ * focusing an input under 16px, which is what makes small search fields feel
+ * broken on phones.
+ */
+function SearchField({ className = "" }: { className?: string }) {
+  const [params, setParams] = useSearchParams();
+  const urlQ = params.get("q") ?? "";
+
+  const [value, setValue] = useState(urlQ);
+  const [seenQ, setSeenQ] = useState(urlQ);
+
+  // Reflect back/forward and direct loads. Adjusting during render (rather than
+  // in an effect) avoids a cascading re-render; comparing against the last URL
+  // we saw means typing never gets clobbered — the URL holds the trimmed form
+  // while the field may legitimately hold a trailing space.
+  if (urlQ !== seenQ) {
+    setSeenQ(urlQ);
+    setValue(urlQ);
+  }
+
+  const update = (v: string) => {
+    setValue(v);
+    setParams(v.trim() ? { q: v.trim() } : {}, { replace: true });
+  };
+
+  return (
+    <div className={`flex items-center gap-2.5 rounded-lg bg-white/[0.07] px-3.5 ring-1 ring-white/15 focus-within:ring-brand-gold/60 ${className}`}>
+      <SearchIcon aria-hidden className="h-5 w-5 shrink-0 text-white/50" />
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => update(e.target.value)}
+        placeholder="Search titles, genres"
+        aria-label="Search titles and genres"
+        inputMode="search"
+        enterKeyHint="search"
+        autoComplete="off"
+        autoCorrect="off"
+        autoCapitalize="off"
+        className="w-full min-w-0 bg-transparent py-3 text-base text-white placeholder-white/40 outline-none"
+      />
+      {value && (
+        <button
+          type="button"
+          aria-label="Clear search"
+          onClick={() => update("")}
+          className="-mr-1 grid h-9 w-9 shrink-0 place-items-center rounded-full text-white/60 transition-colors hover:text-white"
+        >
+          <CloseIcon className="h-4 w-4" />
+        </button>
       )}
     </div>
   );

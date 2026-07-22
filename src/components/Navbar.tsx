@@ -18,6 +18,7 @@ import {
   FlameIcon,
   FilmIcon,
   MonitorIcon,
+  SearchIcon,
 } from "./icons";
 import { SearchBox } from "./SearchBox";
 
@@ -115,7 +116,17 @@ export function Navbar() {
           </ul>
         </div>
 
-        <div className="shrink-0">
+        {/* Phones send you to /search, which has a real tappable field — the
+            navbar's expand-on-tap box can't raise the iOS keyboard. Desktop
+            keeps the inline expanding box. */}
+        <NavLink
+          to="/search"
+          aria-label="Search"
+          className="-mr-2 grid h-11 w-11 shrink-0 place-items-center text-white/90 transition-colors hover:text-white md:hidden"
+        >
+          <SearchIcon className="h-5 w-5" />
+        </NavLink>
+        <div className="hidden shrink-0 md:block">
           <SearchBox />
         </div>
       </nav>
@@ -180,7 +191,9 @@ function BrowseMenu() {
           <div className="fixed left-1/2 top-[68px] z-dropdown w-[min(1080px,94vw)] -translate-x-1/2 md:top-[76px]">
             <div
               role="menu"
-              className="origin-top overflow-hidden rounded-xl border border-white/10 bg-brand-dark/95 shadow-2xl shadow-black/70 backdrop-blur-xl motion-safe:animate-menu-in"
+              // On phones the columns stack into one tall list — cap it to the
+              // viewport and let it scroll, or the lower genres are unreachable.
+              className="origin-top max-h-[calc(100dvh-84px)] overflow-y-auto overscroll-contain rounded-xl border border-white/10 bg-brand-dark/95 shadow-2xl shadow-black/70 backdrop-blur-xl motion-safe:animate-menu-in"
             >
               {/* Cinematic gold hairline across the top edge */}
               <div
