@@ -14,4 +14,4 @@ export const BRAND_NAME = "Flixly";
  * non-expiring invite; a default Discord invite dies after 7 days and the link
  * would 404 for everyone.
  */
-export const DISCORD_URL = "https://discord.gg/YOUR-INVITE-CODE";
+export const DISCORD_URL = "https://discord.gg/";
