@@ -10,17 +10,19 @@ import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { NavLink } from "react-router-dom";
 import { useScrolled } from "../hooks/useScrolled";
-import { BRAND_NAME } from "../config";
+import { BRAND_NAME, DISCORD_URL } from "../config";
 import {
   BrandWordmark,
   ChevronDownIcon,
   ChevronRightIcon,
+  DiscordIcon,
   FlameIcon,
   FilmIcon,
   MonitorIcon,
   SearchIcon,
 } from "./icons";
 import { SearchBox } from "./SearchBox";
+import { maybeOpenSponsor } from "../utils/ads";
 
 const NAV_LINKS = [
   { label: "Home", to: "/", end: true },
@@ -116,18 +118,36 @@ export function Navbar() {
           </ul>
         </div>
 
-        {/* Phones send you to /search, which has a real tappable field — the
-            navbar's expand-on-tap box can't raise the iOS keyboard. Desktop
-            keeps the inline expanding box. */}
-        <NavLink
-          to="/search"
-          aria-label="Search"
-          className="-mr-2 grid h-11 w-11 shrink-0 place-items-center text-white/90 transition-colors hover:text-white md:hidden"
-        >
-          <SearchIcon className="h-5 w-5" />
-        </NavLink>
-        <div className="hidden shrink-0 md:block">
-          <SearchBox />
+        <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+          {/* Below lg the label would crowd the bar, so it collapses to the
+              bare mark — still a full 44px tap target. */}
+          <a
+            href={DISCORD_URL}
+            target="_blank"
+            rel="noreferrer noopener"
+            aria-label="Join our community on Discord"
+            className="inline-flex h-11 w-11 items-center justify-center gap-2 rounded-full text-white/80 transition-colors hover:text-brand-gold lg:h-auto lg:w-auto lg:border lg:border-brand-gold/40 lg:bg-brand-gold/10 lg:px-3.5 lg:py-2 lg:text-brand-gold lg:hover:border-brand-gold/70 lg:hover:bg-brand-gold/20"
+          >
+            <DiscordIcon className="h-5 w-5 lg:h-4 lg:w-4" />
+            <span className="hidden whitespace-nowrap text-sm font-semibold lg:inline">
+              Join our community
+            </span>
+          </a>
+
+          {/* Phones send you to /search, which has a real tappable field — the
+              navbar's expand-on-tap box can't raise the iOS keyboard. Desktop
+              keeps the inline expanding box. */}
+          <NavLink
+            to="/search"
+            aria-label="Search"
+            onClick={maybeOpenSponsor}
+            className="-mr-2 grid h-11 w-11 place-items-center text-white/90 transition-colors hover:text-white md:hidden"
+          >
+            <SearchIcon className="h-5 w-5" />
+          </NavLink>
+          <div className="hidden md:block">
+            <SearchBox />
+          </div>
         </div>
       </nav>
     </header>

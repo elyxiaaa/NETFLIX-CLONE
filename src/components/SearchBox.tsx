@@ -9,6 +9,7 @@ import { useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { SearchIcon, CloseIcon } from "./icons";
+import { maybeOpenSponsor } from "../utils/ads";
 
 export function SearchBox() {
   const navigate = useNavigate();
@@ -47,6 +48,7 @@ export function SearchBox() {
    * re-render, while the input is still `w-0` — leaves it open but untypable.
    */
   const openBox = () => {
+    maybeOpenSponsor();
     flushSync(() => setOpen(true));
     inputRef.current?.focus();
   };

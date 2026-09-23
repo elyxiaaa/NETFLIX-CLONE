@@ -252,6 +252,18 @@ export function MonitorIcon(props: IconProps) {
 }
 
 /**
+ * Discord's mark. Solid-filled at a 24x24 viewBox like the rest of the set, so
+ * it inherits `currentColor` and sizes from `className` the same way.
+ */
+export function DiscordIcon(props: IconProps) {
+  return (
+    <svg fill="currentColor" {...base(props)}>
+      <path d="M19.3 5.34A16.7 16.7 0 0 0 15.16 4c-.18.32-.39.75-.53 1.09a15.5 15.5 0 0 0-4.65 0C9.83 4.75 9.62 4.32 9.44 4a16.7 16.7 0 0 0-4.15 1.34C2.67 9.25 1.96 13.06 2.31 16.82a16.8 16.8 0 0 0 5.1 2.58c.41-.56.78-1.16 1.09-1.79-.6-.22-1.17-.5-1.71-.82.14-.11.28-.22.42-.34a12 12 0 0 0 10.19 0l.41.34c-.54.32-1.11.6-1.71.82.32.63.68 1.23 1.1 1.79a16.75 16.75 0 0 0 5.1-2.58c.4-4.36-.72-8.13-3.01-11.48ZM8.85 14.53c-1 0-1.82-.92-1.82-2.04 0-1.13.8-2.05 1.82-2.05s1.84.92 1.82 2.05c0 1.12-.8 2.04-1.82 2.04Zm6.72 0c-1 0-1.82-.92-1.82-2.04 0-1.13.8-2.05 1.82-2.05s1.83.92 1.81 2.05c0 1.12-.79 2.04-1.81 2.04Z" />
+    </svg>
+  );
+}
+
+/**
  * Brand wordmark. Renders `BRAND_NAME` (from `config.ts`) as a heavy uppercase
  * logotype in the brand accent — accessible text, no external font, scales with
  * the parent font-size. Change the product name in one place: `config.ts`.
