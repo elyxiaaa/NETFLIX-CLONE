@@ -25,7 +25,11 @@ import { buildImageUrl, gradientFromId } from "../utils/images";
 import { genreNames, getYear } from "../utils/genres";
 import { watchPath, type MediaType } from "../utils/routes";
 import { maybeOpenSponsor } from "../utils/ads";
+import { useDocumentMeta, type DocumentMeta } from "../hooks/useDocumentMeta";
+import { NATIVE_BANNERS } from "../config/ads";
+import { AdBanner } from "../components/AdBanner";
 import { FavoriteButton } from "../components/FavoriteButton";
+import { AmbientTrailer } from "../components/AmbientTrailer";
 import { toggleWatchlist, useIsInWatchlist } from "../hooks/useWatchlist";
 import {
   ArrowLeftIcon,
@@ -49,30 +53,6 @@ const PLAYER_PARAMS = "color=E5B80B&autoplay=true";
 const movieEmbed = (id: number) => `${EMBED_BASE}/movie/${id}?${PLAYER_PARAMS}`;
 const tvEmbed = (id: number, season: number, episode: number) =>
   `${EMBED_BASE}/tv/${id}/${season}/${episode}?${PLAYER_PARAMS}`;
-
-/**
- * Ambient YouTube trailer embed (autoplay, looped, no chrome).
- *
- * `start` jumps past the trailer's intro — the MPA green "approved for
- * appropriate audiences" band and studio logos run in the first ~10s — so the
- * hero opens on actual footage instead of the rating card.
- */
-function trailerEmbedUrl(key: string, muted: boolean): string {
-  const params = new URLSearchParams({
-    autoplay: "1",
-    mute: muted ? "1" : "0",
-    controls: "0",
-    loop: "1",
-    playlist: key,
-    start: "10",
-    playsinline: "1",
-    modestbranding: "1",
-    rel: "0",
-    iv_load_policy: "3",
-    disablekb: "1",
-  });
-  return `https://www.youtube.com/embed/${key}?${params.toString()}`;
-}
 
 /** Fullscreen-capable element/document, incl. the WebKit-prefixed variants. */
 type FsElement = HTMLDivElement & {
@@ -197,6 +177,35 @@ function formatRuntime(minutes: number | null): string | null {
   return h > 0 ? `${h}h ${m}m` : `${m}m`;
 }
 
+/**
+ * Page metadata for a title, e.g. "Dune: Part Two (2024) — Watch Online" with
+ * a description like "Movie · 2024 · Sci-Fi, Adventure · ★ 8.3/10 — Paul
+ * Atreides unites with…", and the backdrop as the link-preview image.
+ */
+function titleMeta(movie: Movie | null, mediaType: MediaType, genres: string[]): DocumentMeta {
+  const kind = mediaType === "tv" ? "TV Series" : "Movie";
+  if (!movie) return { title: `Loading ${kind.toLowerCase()}…`, noindex: true };
+
+  const year = getYear(movie.release_date);
+  const facts = [
+    kind,
+    year,
+    genres.slice(0, 3).join(", "),
+    movie.vote_average > 0 ? `★ ${movie.vote_average.toFixed(1)}/10` : null,
+  ].filter(Boolean);
+  const pitch =
+    movie.overview ||
+    `Watch ${movie.title} online in HD. See the cast, trailer and similar titles.`;
+
+  return {
+    title: `${movie.title}${year ? ` (${year})` : ""} — Watch ${mediaType === "tv" ? "Episodes " : ""}Online`,
+    description: `${facts.join(" · ")} — ${pitch}`,
+    image:
+      buildImageUrl(movie.backdrop_path, "w1280") ?? buildImageUrl(movie.poster_path, "w780"),
+    type: mediaType === "tv" ? "video.tv_show" : "video.movie",
+  };
+}
+
 /** A faint "·" separator between inline meta items (rating · year · runtime). */
 function Dot() {
   return (
@@ -270,6 +279,8 @@ function TitleView({
 
   const genres = useMemo(() => (movie ? genreNames(movie.genre_ids) : []), [movie]);
 
+  useDocumentMeta(titleMeta(movie, mediaType, genres));
+
   const startPlay = useCallback(() => {
     maybeOpenSponsor();
     setPlaying(true);
@@ -311,6 +322,9 @@ function TitleView({
         onBack={() => navigate(-1)}
         onSimilars={scrollToSimilar}
       />
+
+      {/* Directly under the player — the longest-dwell surface on the site. */}
+      <AdBanner placement={NATIVE_BANNERS.watch} className="py-6" />
 
       <div className="px-4 md:px-12">
         {isTV && details && details.seasons.length > 0 && (
@@ -382,82 +396,83 @@ function TitleHero({
   };
 
   return (
-    <section className="relative h-[78vh] min-h-[520px] w-full overflow-hidden bg-brand-black">
-      {/* Background: full stream while playing, else backdrop + ambient trailer */}
-      {playing ? (
-        <PlayerFrame src={streamUrl} title={`Playing ${movie.title}`} />
-      ) : (
-        <>
-          {backdrop ? (
-            <img
-              src={backdrop}
-              alt=""
-              fetchPriority="high"
-              className="absolute inset-0 h-full w-full object-cover object-center"
-            />
-          ) : (
-            <div
-              className="absolute inset-0"
-              style={{ backgroundImage: gradientFromId(movie.id) }}
-            />
-          )}
-          {trailerKey && (
-            <iframe
-              key={`${movie.id}-${muted}`}
-              src={trailerEmbedUrl(trailerKey, muted)}
-              title={`${movie.title} trailer`}
-              aria-hidden
-              tabIndex={-1}
-              allow="autoplay; encrypted-media"
-              className="pointer-events-none absolute left-1/2 top-1/2 aspect-video w-[max(100vw,177.78vh)] -translate-x-1/2 -translate-y-1/2 border-0"
-            />
-          )}
-          <div className="absolute inset-0 bg-gradient-to-r from-brand-black/95 via-brand-black/40 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-t from-brand-black via-brand-black/10 to-transparent" />
-        </>
-      )}
+    // Below lg the details stack *under* the media box (overlapping only its
+    // faded bottom edge), so the centered play button is never covered by the
+    // title. From lg up there's room to overlay them bottom-left.
+    <section className="relative bg-brand-black">
+      <div className="relative h-[56vh] min-h-[340px] w-full overflow-hidden lg:h-[78vh] lg:min-h-[520px]">
+        {/* Background: full stream while playing, else backdrop + ambient trailer */}
+        {playing ? (
+          <PlayerFrame src={streamUrl} title={`Playing ${movie.title}`} />
+        ) : (
+          <>
+            {backdrop ? (
+              <img
+                src={backdrop}
+                alt=""
+                fetchPriority="high"
+                className="absolute inset-0 h-full w-full object-cover object-center"
+              />
+            ) : (
+              <div
+                className="absolute inset-0"
+                style={{ backgroundImage: gradientFromId(movie.id) }}
+              />
+            )}
+            {trailerKey && (
+              <AmbientTrailer
+                videoKey={trailerKey}
+                muted={muted}
+                title={`${movie.title} trailer`}
+              />
+            )}
+            <div className="absolute inset-0 bg-gradient-to-r from-brand-black/95 via-brand-black/40 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-brand-black via-brand-black/10 to-transparent" />
+          </>
+        )}
 
-      {/* Top controls */}
-      <button
-        type="button"
-        onClick={onBack}
-        aria-label="Back"
-        className="absolute left-4 top-[80px] z-10 grid h-11 w-11 place-items-center rounded-full bg-black/50 text-white ring-1 ring-white/20 backdrop-blur transition hover:bg-black/70 md:left-8"
-      >
-        <ArrowLeftIcon className="h-5 w-5" />
-      </button>
-      {!playing && trailerKey && (
+        {/* Top controls */}
         <button
           type="button"
-          onClick={() => setMuted((m) => !m)}
-          aria-label={muted ? "Unmute trailer" : "Mute trailer"}
-          className="absolute right-4 top-[80px] z-10 grid h-11 w-11 place-items-center rounded-full bg-black/50 text-white ring-1 ring-white/20 backdrop-blur transition hover:bg-black/70 md:right-8"
+          onClick={onBack}
+          aria-label="Back"
+          className="absolute left-4 top-[80px] z-10 grid h-11 w-11 place-items-center rounded-full bg-black/50 text-white ring-1 ring-white/20 backdrop-blur transition hover:bg-black/70 md:left-8"
         >
-          {muted ? (
-            <VolumeMuteIcon className="h-5 w-5" />
-          ) : (
-            <VolumeHighIcon className="h-5 w-5" />
-          )}
+          <ArrowLeftIcon className="h-5 w-5" />
         </button>
-      )}
-
-      {/* Center play */}
-      {!playing && (
-        <div className="pointer-events-none absolute inset-0 grid place-items-center">
+        {!playing && trailerKey && (
           <button
             type="button"
-            onClick={onPlay}
-            aria-label={`Play ${movie.title}`}
-            className="pointer-events-auto grid h-20 w-20 place-items-center rounded-full bg-white/15 text-white ring-1 ring-white/40 backdrop-blur transition duration-200 hover:scale-110 hover:bg-white/25"
+            onClick={() => setMuted((m) => !m)}
+            aria-label={muted ? "Unmute trailer" : "Mute trailer"}
+            className="absolute right-4 top-[80px] z-10 grid h-11 w-11 place-items-center rounded-full bg-black/50 text-white ring-1 ring-white/20 backdrop-blur transition hover:bg-black/70 md:right-8"
           >
-            <PlayIcon className="ml-1 h-9 w-9" />
+            {muted ? (
+              <VolumeMuteIcon className="h-5 w-5" />
+            ) : (
+              <VolumeHighIcon className="h-5 w-5" />
+            )}
           </button>
-        </div>
-      )}
+        )}
 
-      {/* Overlay details */}
+        {/* Center play — on lg, centered in the band above the overlaid details */}
+        {!playing && (
+          <div className="pointer-events-none absolute inset-0 grid place-items-center lg:bottom-[35%]">
+            <button
+              type="button"
+              onClick={onPlay}
+              aria-label={`Play ${movie.title}`}
+              className="pointer-events-auto grid h-20 w-20 place-items-center rounded-full bg-white/15 text-white ring-1 ring-white/40 backdrop-blur transition duration-200 hover:scale-110 hover:bg-white/25"
+            >
+              <PlayIcon className="ml-1 h-9 w-9" />
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Details */}
       {!playing && (
-        <div className="absolute inset-x-0 bottom-0 px-4 pb-10 md:px-12">
+        <div className="relative z-10 -mt-24 px-4 pb-6 md:px-12 lg:absolute lg:inset-x-0 lg:bottom-0 lg:mt-0 lg:pb-10">
           <div className="max-w-2xl space-y-4">
             <h1 className="text-balance font-display text-5xl uppercase leading-[0.9] tracking-[0.01em] text-white drop-shadow-xl sm:text-6xl md:text-7xl">
               {movie.title}
@@ -690,6 +705,12 @@ function EpisodeRow({
 
 /** Shown when the route id is invalid or the title fails to load. */
 function NotFound() {
+  useDocumentMeta({
+    title: "Title Not Found",
+    description: "We couldn't find that movie or show. It may have been removed, or the link may be wrong.",
+    noindex: true,
+  });
+
   return (
     <div className="grid min-h-[60vh] place-items-center px-4 text-center">
       <div className="space-y-4">

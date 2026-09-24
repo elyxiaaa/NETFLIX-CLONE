@@ -5,8 +5,11 @@
  * result) and the lead row, then renders the remaining `rows` as independent
  * `MovieRow`s. Keeping this generic means each page is just a small config.
  */
+import { Fragment } from "react";
 import { useFetchMovies } from "../hooks/useFetchMovies";
 import type { MovieRowProps } from "../types/movie";
+import { IN_FEED_AFTER_ROW, NATIVE_BANNERS } from "../config/ads";
+import { AdBanner } from "./AdBanner";
 import { Hero } from "./Hero";
 import { HeroSkeleton } from "./HeroSkeleton";
 import { MovieRow } from "./MovieRow";
@@ -49,8 +52,15 @@ export function BrowsePage({
           <ScrollRow title={heroRowTitle} movies={data} poster={heroRowPoster} />
         )}
 
-        {rows.map((row) => (
-          <MovieRow key={row.title} {...row} />
+        {rows.map((row, i) => (
+          <Fragment key={row.title}>
+            <MovieRow {...row} />
+            {/* In-feed unit: sits in the scroll path instead of below every
+                row in the footer, where it was served but rarely seen. */}
+            {i === IN_FEED_AFTER_ROW && (
+              <AdBanner placement={NATIVE_BANNERS.inFeed} className="py-4" />
+            )}
+          </Fragment>
         ))}
       </div>
     </>

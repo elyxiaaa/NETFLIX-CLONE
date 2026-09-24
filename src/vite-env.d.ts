@@ -9,6 +9,12 @@ interface ImportMetaEnv {
   readonly VITE_TMDB_KEY?: string;
   /** Set to `"false"` to hit the live TMDB API instead of the bundled mock data. */
   readonly VITE_USE_MOCK?: string;
+  /**
+   * Public origin of the deployed site, e.g. `https://flixly.example.com`. Used
+   * to build absolute link-preview image URLs (og:image). Falls back to the
+   * current origin at runtime, but the static index.html needs it set at build.
+   */
+  readonly VITE_SITE_URL?: string;
 }
 
 interface ImportMeta {

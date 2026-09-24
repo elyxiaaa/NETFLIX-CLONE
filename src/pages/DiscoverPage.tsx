@@ -14,6 +14,7 @@ import { useSearchParams } from "react-router-dom";
 import { getPage } from "../services/movies";
 import { useInfiniteMovies } from "../hooks/useInfiniteMovies";
 import { MovieCard } from "../components/MovieCard";
+import { useDocumentMeta } from "../hooks/useDocumentMeta";
 
 export function DiscoverPage() {
   const [params] = useSearchParams();
@@ -42,6 +43,12 @@ function DiscoverGrid({
   type: "movie" | "tv";
 }) {
   const fetchPage = useCallback((page: number) => getPage(fetchUrl, page), [fetchUrl]);
+  const kind = type === "tv" ? "TV Shows" : "Movies";
+  useDocumentMeta({
+    title: `${title} ${kind}`,
+    description: `Browse the most popular ${title} ${kind.toLowerCase()} — sorted by what people are watching right now.`,
+  });
+
   const { items, initialLoading, loadingMore, hasMore, error, loadMore } =
     useInfiniteMovies(fetchPage);
 

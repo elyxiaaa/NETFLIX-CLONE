@@ -2,18 +2,59 @@
 <html lang="en" class="bg-black">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="preconnect" href="https://image.tmdb.org" crossorigin />
     <meta name="theme-color" content="#000000" />
+    <meta name="color-scheme" content="dark" />
+
+    <!-- Site-wide defaults. Each route refines these at runtime via useDocumentMeta. -->
+    <title>Flixly — Watch Trending Movies &amp; TV Shows Online</title>
     <meta
       name="description"
-      content="Flixly — a cinematic streaming UI. Browse trending films and shows across TV, Movies, and New & Popular."
+      content="Stream the latest movies and TV series on Flixly. Browse what's trending, discover new releases and top-rated picks, and build your own watchlist."
     />
-    <title>Flixly — Browse</title>
+    <meta
+      name="keywords"
+      content="Flixly, watch movies online, stream TV shows, trending movies, new releases, top rated films, TV series, watchlist"
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="application-name" content="Flixly" />
+    <meta name="apple-mobile-web-app-title" content="Flixly" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="format-detection" content="telephone=no" />
+
+    <!-- Open Graph (Facebook, Discord, Messenger, LinkedIn…) -->
+    <meta property="og:site_name" content="Flixly" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:title" content="Flixly — Watch Trending Movies &amp; TV Shows Online" />
+    <meta
+      property="og:description"
+      content="Stream the latest movies and TV series on Flixly. Browse what's trending, discover new releases and top-rated picks, and build your own watchlist."
+    />
+    <!-- %SITE_URL% is filled in at build time from VITE_SITE_URL (see vite.config.ts). -->
+    <meta property="og:image" content="%SITE_URL%/og-image.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Flixly — Watch trending movies &amp; TV shows" />
+
+    <!-- Twitter / X -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="%SITE_URL%/og-image.png" />
+    <meta name="twitter:image:alt" content="Flixly — Watch trending movies &amp; TV shows" />
+    <meta name="twitter:title" content="Flixly — Watch Trending Movies &amp; TV Shows Online" />
+    <meta
+      name="twitter:description"
+      content="Stream the latest movies and TV series on Flixly. Browse what's trending, discover new releases and top-rated picks, and build your own watchlist."
+    />
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <script src="https://pl30425488.profitableratecpmnetwork.com/0d/e2/3b/0de23b3ffe0ffd0534cdac5c6cb49811.js"></script>
   </body>
 </html>

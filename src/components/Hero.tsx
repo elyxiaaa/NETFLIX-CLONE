@@ -19,30 +19,9 @@ import { getCardBadge } from "../utils/badges";
 import { PlayIcon, InfoIcon, VolumeHighIcon, VolumeMuteIcon } from "./icons";
 import { Button } from "./Button";
 import { Badge } from "./Badge";
+import { AmbientTrailer } from "./AmbientTrailer";
 
 const TV_GENRES = new Set([10759, 10762, 10763, 10764, 10765, 10766, 10767, 10768]);
-
-/**
- * Build the ambient background embed for a trailer: autoplay + loop (which needs
- * `playlist=<key>`), no chrome, no related videos. `mute` toggles audio without
- * remounting — YouTube reads the flag from the src on (re)load.
- */
-function trailerEmbedUrl(key: string, muted: boolean): string {
-  const params = new URLSearchParams({
-    autoplay: "1",
-    mute: muted ? "1" : "0",
-    controls: "0",
-    loop: "1",
-    playlist: key,
-    start: "10", // skip the MPA green band + studio logos at the trailer's start
-    playsinline: "1",
-    modestbranding: "1",
-    rel: "0",
-    iv_load_policy: "3",
-    disablekb: "1",
-  });
-  return `https://www.youtube.com/embed/${key}?${params.toString()}`;
-}
 
 export function Hero({ movie }: { movie: Movie }) {
   const navigate = useNavigate();
@@ -96,19 +75,15 @@ export function Hero({ movie }: { movie: Movie }) {
         />
       )}
 
-      {/* Ambient trailer: cover-fills the hero, fades in once the player loads. */}
+      {/* Ambient trailer: cover-fills the hero, fades in once it's actually playing. */}
       {trailerKey && (
-        <iframe
-          key={`${movie.id}-${muted}`}
-          src={trailerEmbedUrl(trailerKey, muted)}
+        <AmbientTrailer
+          videoKey={trailerKey}
+          muted={muted}
           title={`${movie.title} trailer`}
-          allow="autoplay; encrypted-media"
-          aria-hidden="true"
-          tabIndex={-1}
-          onLoad={() => setTrailerReady(true)}
-          className={`pointer-events-none absolute left-1/2 top-1/2 aspect-video w-[max(100vw,177.78vh)] -translate-x-1/2 -translate-y-1/2 border-0 transition-opacity duration-700 ${
-            trailerReady ? "opacity-100" : "opacity-0"
-          }`}
+          // Latch on: the mute toggle shouldn't flicker away while a mute
+          // change reloads the player.
+          onPlayingChange={(p) => p && setTrailerReady(true)}
         />
       )}
 

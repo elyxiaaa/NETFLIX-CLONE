@@ -2,6 +2,7 @@
 import { requests } from "../services/api";
 import type { MovieRowProps } from "../types/movie";
 import { BrowsePage } from "../components/BrowsePage";
+import { useDocumentMeta } from "../hooks/useDocumentMeta";
 
 const ROWS: MovieRowProps[] = [
   { title: "Top 10 Today", fetchUrl: requests.fetchPopular, poster: true, numbered: true },
@@ -13,6 +14,8 @@ const ROWS: MovieRowProps[] = [
 ];
 
 export function HomePage() {
+  useDocumentMeta({});
+
   return (
     <BrowsePage
       heroFetchUrl={requests.fetchTrending}

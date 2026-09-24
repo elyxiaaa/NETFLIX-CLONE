@@ -8,16 +8,19 @@
  */
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
-import { NavLink } from "react-router-dom";
+import { createPortal } from "react-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { useScrolled } from "../hooks/useScrolled";
 import { BRAND_NAME, DISCORD_URL } from "../config";
 import {
   BrandWordmark,
   ChevronDownIcon,
   ChevronRightIcon,
+  CloseIcon,
   DiscordIcon,
   FlameIcon,
   FilmIcon,
+  MenuIcon,
   MonitorIcon,
   SearchIcon,
 } from "./icons";
@@ -100,11 +103,17 @@ export function Navbar() {
     >
       <nav className="flex h-16 items-center justify-between gap-3 px-4 md:h-[68px] md:px-12">
         <div className="flex min-w-0 items-center gap-4 sm:gap-6 lg:gap-8">
-          <NavLink to="/" aria-label={`${BRAND_NAME} home`} className="shrink-0">
+          <NavLink
+            to="/"
+            aria-label={`${BRAND_NAME} home`}
+            onClick={maybeOpenSponsor}
+            className="shrink-0"
+          >
             <BrandWordmark className="text-xl md:text-2xl" />
           </NavLink>
 
-          <ul className="hide-scrollbar flex items-center gap-4 overflow-x-auto text-sm sm:gap-5">
+          {/* Phones get these inside the burger drawer instead. */}
+          <ul className="hidden items-center gap-5 text-sm md:flex">
             {NAV_LINKS.map((link) => (
               <li key={link.to} className="shrink-0">
                 <NavLink to={link.to} end={link.end} className={linkClass}>
@@ -119,20 +128,19 @@ export function Navbar() {
         </div>
 
         <div className="flex shrink-0 items-center gap-1 sm:gap-2">
-          {/* Below lg the label would crowd the bar, so it collapses to the
-              bare mark — still a full 44px tap target. */}
+          {/* Reads as a utility link, same weight as the nav items — not a CTA.
+              Below lg it collapses to the bare mark; phones find it in the drawer. */}
           <a
             href={DISCORD_URL}
             target="_blank"
             rel="noreferrer noopener"
             aria-label="Join our community on Discord"
-            className="inline-flex h-11 w-11 items-center justify-center gap-2 rounded-full text-white/80 transition-colors hover:text-brand-gold lg:h-auto lg:w-auto lg:border lg:border-brand-gold/40 lg:bg-brand-gold/10 lg:px-3.5 lg:py-2 lg:text-brand-gold lg:hover:border-brand-gold/70 lg:hover:bg-brand-gold/20"
+            className="group/dc hidden h-11 min-w-11 md:inline-flex items-center justify-center gap-2 text-sm text-white/70 transition-colors hover:text-white lg:px-1"
           >
-            <DiscordIcon className="h-5 w-5 lg:h-4 lg:w-4" />
-            <span className="hidden whitespace-nowrap text-sm font-semibold lg:inline">
-              Join our community
-            </span>
+            <DiscordIcon className="h-5 w-5 transition-colors group-hover/dc:text-brand-gold" />
+            <span className="hidden whitespace-nowrap lg:inline">Join Our Community</span>
           </a>
+          <span aria-hidden className="mx-2 hidden h-4 w-px bg-white/15 md:block" />
 
           {/* Phones send you to /search, which has a real tappable field — the
               navbar's expand-on-tap box can't raise the iOS keyboard. Desktop
@@ -140,14 +148,14 @@ export function Navbar() {
           <NavLink
             to="/search"
             aria-label="Search"
-            onClick={maybeOpenSponsor}
-            className="-mr-2 grid h-11 w-11 place-items-center text-white/90 transition-colors hover:text-white md:hidden"
+            className="grid h-11 w-11 place-items-center text-white/90 transition-colors hover:text-white md:hidden"
           >
             <SearchIcon className="h-5 w-5" />
           </NavLink>
           <div className="hidden md:block">
             <SearchBox />
           </div>
+          <MobileMenu />
         </div>
       </nav>
     </header>
@@ -277,6 +285,189 @@ function BrowseMenu() {
           </div>
         </>
       )}
+    </div>
+  );
+}
+
+/**
+ * Phone navigation: a burger in the bar's right corner that opens a right-edge
+ * drawer with the section links, the Browse categories and the Discord link.
+ *
+ * Portaled to `<body>` because the scrolled header's `backdrop-blur` makes it
+ * the containing block for fixed children, which would clip the drawer to the
+ * bar. Closes on route change, Escape, or a tap on the scrim; locks page scroll
+ * while open.
+ */
+function MobileMenu() {
+  // Remember *which* location the drawer was opened on; navigating anywhere
+  // else (a link in it, back/forward) closes it without an extra effect.
+  const { key } = useLocation();
+  const [openedAt, setOpenedAt] = useState<string | null>(null);
+  const open = openedAt === key;
+  const setOpen = (next: boolean) => setOpenedAt(next ? key : null);
+  const close = () => setOpen(false);
+
+  useEffect(() => {
+    if (!open) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpenedAt(null);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        aria-label="Open menu"
+        aria-expanded={open}
+        aria-controls="mobile-menu"
+        className="-mr-2 grid h-11 w-11 place-items-center text-white/90 transition-colors hover:text-white md:hidden"
+      >
+        <MenuIcon className="h-6 w-6" />
+      </button>
+
+      {open &&
+        createPortal(
+          <div className="fixed inset-0 z-modal md:hidden">
+            <div
+              aria-hidden
+              onClick={close}
+              className="absolute inset-0 bg-black/70 backdrop-blur-sm motion-safe:animate-fade-in"
+            />
+            <nav
+              id="mobile-menu"
+              aria-label="Main"
+              className="absolute inset-y-0 right-0 flex w-[min(340px,86vw)] flex-col border-l border-white/10 bg-brand-dark shadow-2xl shadow-black/70 motion-safe:animate-drawer-in"
+            >
+              <div className="flex h-16 shrink-0 items-center justify-between border-b border-white/5 pl-5 pr-2">
+                <BrandWordmark className="text-xl" />
+                <button
+                  type="button"
+                  onClick={close}
+                  aria-label="Close menu"
+                  className="grid h-11 w-11 place-items-center text-white/80 transition-colors hover:text-white"
+                >
+                  <CloseIcon className="h-6 w-6" />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto overscroll-contain px-5 pb-6">
+                <ul className="py-3">
+                  {NAV_LINKS.map((link) => (
+                    <li key={link.to}>
+                      <NavLink
+                        to={link.to}
+                        end={link.end}
+                        onClick={close}
+                        className={({ isActive }) =>
+                          `flex items-center gap-3 py-2.5 font-display text-2xl uppercase tracking-wide transition-colors ${
+                            isActive ? "text-white" : "text-white/60 hover:text-white"
+                          }`
+                        }
+                      >
+                        {({ isActive }) => (
+                          <>
+                            <span
+                              aria-hidden
+                              className={`h-5 w-1 rounded-full ${isActive ? "bg-brand-gold" : "bg-transparent"}`}
+                            />
+                            {link.label}
+                          </>
+                        )}
+                      </NavLink>
+                    </li>
+                  ))}
+                </ul>
+
+                <div className="space-y-6 border-t border-white/5 pt-5">
+                  <div>
+                    <ColHeader icon={<FlameIcon className="h-4 w-4" />}>Trending</ColHeader>
+                    <div className="flex flex-wrap gap-2">
+                      {TRENDING.map((item) => (
+                        <NavLink
+                          key={item.label}
+                          to={browseHref(item, "tv")}
+                          onClick={close}
+                          className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[13px] font-medium text-white/75 transition-colors hover:border-brand-gold/50 hover:text-white"
+                        >
+                          {item.label}
+                        </NavLink>
+                      ))}
+                    </div>
+                  </div>
+
+                  <DrawerGenres
+                    icon={<FilmIcon className="h-4 w-4" />}
+                    title="Movie Genres"
+                    items={MOVIE_GENRES}
+                    type="movie"
+                    onSelect={close}
+                  />
+                  <DrawerGenres
+                    icon={<MonitorIcon className="h-4 w-4" />}
+                    title="Series Genres"
+                    items={TV_GENRES}
+                    type="tv"
+                    onSelect={close}
+                  />
+                </div>
+              </div>
+
+              <a
+                href={DISCORD_URL}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="flex shrink-0 items-center gap-3 border-t border-white/5 px-5 py-4 text-sm text-white/70 transition-colors hover:text-white"
+              >
+                <DiscordIcon className="h-5 w-5 text-brand-gold" />
+                Join Our Community
+                <ChevronRightIcon className="ml-auto h-4 w-4 text-white/40" />
+              </a>
+            </nav>
+          </div>,
+          document.body,
+        )}
+    </>
+  );
+}
+
+/** A two-column genre list for the phone drawer. */
+function DrawerGenres({
+  icon,
+  title,
+  items,
+  type,
+  onSelect,
+}: {
+  icon: ReactNode;
+  title: string;
+  items: BrowseItem[];
+  type: "movie" | "tv";
+  onSelect: () => void;
+}) {
+  return (
+    <div>
+      <ColHeader icon={icon}>{title}</ColHeader>
+      <div className="grid grid-cols-2 gap-x-3">
+        {items.map((item) => (
+          <NavLink
+            key={item.label}
+            to={browseHref(item, type)}
+            onClick={onSelect}
+            className="truncate py-2 text-sm text-white/70 transition-colors hover:text-white"
+          >
+            {item.label}
+          </NavLink>
+        ))}
+      </div>
     </div>
   );
 }
