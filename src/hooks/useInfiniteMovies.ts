@@ -29,9 +29,14 @@ export function useInfiniteMovies(
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState(false);
 
-  // Keep the latest fetcher without retriggering the mount effect.
+  // Keep the latest fetcher without retriggering the mount effect. Synced in an
+  // effect rather than during render: the ref is only ever read from effects and
+  // async callbacks, so updating it after commit is both correct and the pattern
+  // React documents. `useRef`'s initial value already covers the first render.
   const fetchRef = useRef(fetchPage);
-  fetchRef.current = fetchPage;
+  useEffect(() => {
+    fetchRef.current = fetchPage;
+  });
   // Guards against overlapping loads (observer can fire rapidly).
   const busy = useRef(false);
 

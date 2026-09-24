@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useSearch } from "../hooks/useSearch";
+import { useDocumentMeta } from "../hooks/useDocumentMeta";
 import { MovieCard } from "../components/MovieCard";
 import { SearchIcon, CloseIcon } from "../components/icons";
 
@@ -10,6 +11,14 @@ export function SearchPage() {
   const q = params.get("q") ?? "";
   const { data, loading } = useSearch(q);
   const hasQuery = q.trim().length > 0;
+
+  useDocumentMeta({
+    title: hasQuery ? `Results for “${q.trim()}”` : "Search",
+    description: hasQuery
+      ? `Movies and TV shows matching “${q.trim()}”${loading ? "" : ` — ${data.length} title${data.length === 1 ? "" : "s"} found`}.`
+      : "Search thousands of movies and TV shows by title or genre and find your next watch.",
+    noindex: hasQuery,
+  });
 
   return (
     <div className="min-h-screen px-4 pb-16 pt-24 md:px-12 md:pt-28">

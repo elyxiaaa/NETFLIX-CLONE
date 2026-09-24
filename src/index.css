@@ -85,6 +85,96 @@
   }
 }
 
+/* ---------------------------------------------------------------------------
+   Adsterra native banner (`AdBanner`) — re-skinned as backdrop `MovieCard`s.
+
+   The widget builds its own DOM and injects a runtime <style> using class names
+   of the form `<random-prefix>__bn`, `__img`, `__title`, … so we match on the
+   suffix. `!important` is needed because that <style> lands in <head> after our
+   bundle and wins ties on source order.
+
+   Sizes mirror MovieCard's non-poster branch: w-[236px] sm:w-[264px]
+   md:w-[300px], aspect-video art, rounded-xl, caption below.
+   --------------------------------------------------------------------------- */
+/* The widget always serves 4 banners. The track is capped at exactly N cards
+   wide and centred, and each item takes an exact 1/N share of it — so items
+   land on MovieCard's width without ever needing a max-width. (Capping the
+   *items* instead doesn't work: flexbox breaks lines on the clamped size, so a
+   300px cap let a 4th item squeeze onto the first line and wrap 3 + 1.)
+
+   `flex-grow: 0` keeps a short last row from stretching; `justify-content`
+   centres it. --ad-item tracks MovieCard's responsive widths. */
+.ad-native [class$="__stand"] {
+  --ad-cols: 2;
+  --ad-item: 236px;
+  --ad-gap: 0.625rem; /* matches ScrollRow's gap-2.5 */
+  justify-content: center !important;
+  gap: var(--ad-gap) !important;
+  max-width: calc(
+    var(--ad-cols) * var(--ad-item) + (var(--ad-cols) - 1) * var(--ad-gap)
+  ) !important;
+  margin-inline: auto !important;
+}
+@media (min-width: 640px) {
+  .ad-native [class$="__stand"] {
+    --ad-item: 264px;
+  }
+}
+@media (min-width: 768px) {
+  .ad-native [class$="__stand"] {
+    --ad-item: 300px;
+  }
+}
+@media (min-width: 1280px) {
+  .ad-native [class$="__stand"] {
+    --ad-cols: 4;
+  }
+}
+
+.ad-native [class$="__bn-container"] {
+  flex: 0 1 calc((100% - (var(--ad-cols) - 1) * var(--ad-gap)) / var(--ad-cols))
+    !important;
+  padding: 0 !important;
+}
+
+.ad-native [class$="__bn"] {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+}
+
+.ad-native [class$="__img-container"] {
+  border-radius: 0.75rem;
+  background-color: #2a2a2a;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 0 0 1px rgb(255 255 255 / 0.05);
+  transition: box-shadow 200ms ease-out;
+}
+.ad-native [class$="__bn"]:hover [class$="__img-container"] {
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.6), 0 0 0 2px rgb(229 184 11 / 0.7);
+}
+
+/* The widget ratios the art with padding-top: 75% (4:3); cards are 16:9. */
+.ad-native [class$="__img"] {
+  padding-top: 56.25% !important;
+}
+
+/* Caption below the art, matching MovieCard's title line. Clamped to two lines
+   so ad copy of any length can't leave the row ragged. */
+.ad-native [class$="__title"] {
+  margin: 0.625rem 0 0 !important;
+  padding: 0 2px !important;
+  min-height: 0 !important;
+  text-align: left !important;
+  font-size: 0.875rem !important;
+  line-height: 1.25rem !important;
+  font-weight: 600 !important;
+  color: #fff !important;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
 /* Motion is state feedback, not decoration — honor the OS preference fully. */
 @media (prefers-reduced-motion: reduce) {
   html {

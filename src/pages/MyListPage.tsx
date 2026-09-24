@@ -6,10 +6,20 @@
 import { Link } from "react-router-dom";
 import { useWatchlistMovies } from "../hooks/useWatchlist";
 import { MovieCard } from "../components/MovieCard";
+import { useDocumentMeta } from "../hooks/useDocumentMeta";
 import { HeartIcon } from "../components/icons";
 
 export function MyListPage() {
   const movies = useWatchlistMovies();
+
+  useDocumentMeta({
+    title: movies.length > 0 ? `My List (${movies.length})` : "My List",
+    description:
+      movies.length > 0
+        ? `Your ${movies.length} saved title${movies.length === 1 ? "" : "s"}, ready whenever you are.`
+        : "Save movies and shows you want to watch later — they'll wait for you here.",
+    noindex: true,
+  });
 
   return (
     <div className="min-h-screen px-4 pb-16 pt-24 md:px-12 md:pt-28">

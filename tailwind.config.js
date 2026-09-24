@@ -61,6 +61,11 @@ export default {
           from: { opacity: "0", transform: "translateY(6px)" },
           to: { opacity: "1", transform: "none" },
         },
+        // Right-edge drawer sliding in.
+        "drawer-in": {
+          from: { transform: "translateX(100%)" },
+          to: { transform: "none" },
+        },
       },
       animation: {
         shimmer: "shimmer 1.6s infinite linear",
@@ -68,6 +73,7 @@ export default {
         "scale-in": "scale-in 240ms cubic-bezier(0.22,1,0.36,1) both",
         "menu-in": "menu-in 200ms cubic-bezier(0.22,1,0.36,1) both",
         "fade-up": "fade-up 260ms cubic-bezier(0.22,1,0.36,1) both",
+        "drawer-in": "drawer-in 320ms cubic-bezier(0.22,1,0.36,1) both",
       },
       transitionTimingFunction: {
         // ease-out-quint — premium deceleration, no bounce

@@ -9,7 +9,6 @@ import { useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { SearchIcon, CloseIcon } from "./icons";
-import { maybeOpenSponsor } from "../utils/ads";
 
 export function SearchBox() {
   const navigate = useNavigate();
@@ -21,11 +20,21 @@ export function SearchBox() {
   const [value, setValue] = useState(onSearchPage ? params.get("q") ?? "" : "");
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Reflect URL changes (back/forward, direct load) into the field.
+  /*
+   * Reflect URL changes (back/forward, direct load) into the field.
+   *
+   * This is the effect's intended job — subscribing to an external system, here
+   * the browser's history/URL — but the lint rule can't distinguish that from a
+   * render-derived reset, so it's silenced deliberately. Deriving the value
+   * instead isn't an option: the field is a controlled input the user types
+   * into, and `update()` drives the URL from it.
+   */
   useEffect(() => {
     if (onSearchPage) {
+      /* eslint-disable react-hooks/set-state-in-effect */
       setOpen(true);
       setValue(params.get("q") ?? "");
+      /* eslint-enable react-hooks/set-state-in-effect */
     }
   }, [onSearchPage, params]);
 
@@ -48,7 +57,6 @@ export function SearchBox() {
    * re-render, while the input is still `w-0` — leaves it open but untypable.
    */
   const openBox = () => {
-    maybeOpenSponsor();
     flushSync(() => setOpen(true));
     inputRef.current?.focus();
   };

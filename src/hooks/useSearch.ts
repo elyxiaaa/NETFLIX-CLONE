@@ -1,38 +1,41 @@
 /**
  * Debounced title search. Returns `{ data, loading }` for a query string and
  * cancels superseded requests (keystrokes) so results never arrive out of order.
+ *
+ * Results are stored tagged with the query that produced them, so `loading` is
+ * derived by comparing that tag against the current query rather than being
+ * flipped by a setState inside the effect.
  */
 import { useEffect, useState } from "react";
 import type { Movie } from "../types/movie";
 import { searchMovies } from "../services/movies";
 
 export function useSearch(query: string, debounceMs = 250) {
-  const [state, setState] = useState<{ data: Movie[]; loading: boolean }>({
-    data: [],
-    loading: false,
-  });
+  const q = query.trim();
+  const [result, setResult] = useState<{ q: string; data: Movie[] } | null>(null);
 
   useEffect(() => {
-    const q = query.trim();
-    if (!q) {
-      setState({ data: [], loading: false });
-      return;
-    }
+    if (!q) return;
 
     let active = true;
-    setState((s) => ({ ...s, loading: true }));
-
     const timer = setTimeout(() => {
       searchMovies(q)
-        .then((data) => active && setState({ data, loading: false }))
-        .catch(() => active && setState({ data: [], loading: false }));
+        .then((data) => active && setResult({ q, data }))
+        .catch(() => active && setResult({ q, data: [] }));
     }, debounceMs);
 
     return () => {
       active = false;
       clearTimeout(timer);
     };
-  }, [query, debounceMs]);
+  }, [q, debounceMs]);
 
-  return state;
+  // An empty query shows nothing and never spins; otherwise a result tagged
+  // with a different query is stale, so we're still loading.
+  const fresh = result !== null && result.q === q;
+
+  return {
+    data: q && fresh ? result.data : [],
+    loading: Boolean(q) && !fresh,
+  };
 }

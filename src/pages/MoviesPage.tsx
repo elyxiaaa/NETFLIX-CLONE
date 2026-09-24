@@ -2,6 +2,7 @@
 import { requests } from "../services/api";
 import type { MovieRowProps } from "../types/movie";
 import { BrowsePage } from "../components/BrowsePage";
+import { useDocumentMeta } from "../hooks/useDocumentMeta";
 
 const ROWS: MovieRowProps[] = [
   { title: "Sci-Fi & Fantasy", fetchUrl: requests.fetchSciFi },
@@ -11,6 +12,12 @@ const ROWS: MovieRowProps[] = [
 ];
 
 export function MoviesPage() {
+  useDocumentMeta({
+    title: "Movies",
+    description:
+      "Watch blockbuster action, sci-fi and fantasy epics, crime thrillers, comedies and critically acclaimed films — all in one place.",
+  });
+
   return (
     <BrowsePage
       heroFetchUrl={requests.fetchActionMovies}
