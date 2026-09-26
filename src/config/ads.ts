@@ -52,43 +52,62 @@ export const IN_FEED_AFTER_ROW = 1;
 /**
  * Sponsor pop — a self-controlled popunder built on the Adsterra direct link.
  *
- * Deliberately ours rather than Adsterra's popunder script: that script fires
- * on a fixed click *counter*, not at random, and consumes the gesture it fires
- * on (measured — the click never reaches the page, so the visitor's tap does
- * nothing). Opening the tab from our own handler leaves the click intact.
+ * Runs alongside the Adsterra popunder script in `index.html`. That one is the
+ * higher-rate product but consumes the click it fires on; this one opens from
+ * our own handler and leaves the click intact, so the two cover different
+ * gestures.
  *
- * Firing is gated three ways, all checked in `maybeOpenSponsor`:
- *   1. `graceClicks` — the opening gestures of a visit never fire
- *   2. `probability` — past the grace, each qualifying click is a dice roll
- *   3. `cooldownMs`  — a hard floor between opens, however the dice land
- *
- * Note the *rate* is a direct-link rate. Adsterra's popunder unit is a separate
- * product with its own (higher) pricing, and it's script-based, so it can't be
- * swapped in by changing `url` here — it would mean re-adding their script and
- * taking the gesture-swallowing back with it.
+ * A single cooldown is the only gate. Time-delayed and probabilistic variants
+ * were tried on 2026-09-25/26 and firing dropped too far to be worth it — the
+ * revenue data over that window is in the commit history.
  */
 export const SPONSOR = {
   /** Direct-link URL from the Adsterra unit. `""` disables the pop entirely. */
   url: "https://www.effectivecpmnetwork.com/nyfb4ufr6z?key=75ffa84acaf66abd5c01c978533654e9",
 
   /**
-   * Qualifying clicks let through untouched at the start of each visit.
-   * Counted per browser tab/session, so every new visit gets its own grace.
+   * Time on site before the link can fire, measured from the first page of the
+   * visit. Without it the very first click of a new browser always opened an
+   * ad — the cooldown can't prevent that, since an unset timestamp reads as
+   * ~56 years elapsed. Landing on a site and having the first button you touch
+   * spawn an ad tab reads as a scam, whatever the button was.
+   *
+   * Set well behind `POPUNDER.delayMs` on purpose. Both units open a tab, but
+   * measured over 09/23–09/26 the popunder returned $0.84 per 1k opens against
+   * this link's $0.47 — same interruption, roughly half the value. So the
+   * popunder takes the early part of a visit and this only joins much later,
+   * which keeps the total number of interruptions down.
    */
-  graceClicks: 3,
+  armAfterMs: 15 * 60 * 1000,
 
-  /** Chance (0–1) that a qualifying click past the grace opens the tab. */
-  probability: 0.25,
-
-  /** Hard minimum between two opens. */
+  /** Minimum gap between two opens, per browser, once armed. */
   cooldownMs: 15 * 60 * 1000,
+} as const;
 
-  /**
-   * Also keep a brand-new visitor's first `cooldownMs` quiet, across sessions.
-   * `graceClicks` already protects the start of every visit, so this is the
-   * stricter, first-impression-only guard — set false to monetize sooner.
-   */
-  seedOnFirstVisit: true,
+/**
+ * Adsterra popunder — the script-based unit, armed a short way into the visit.
+ *
+ * Earns ~2.8x the native banner per impression, so it stays. The cost is
+ * measured and unavoidable: once this script is on the page it consumes the
+ * next click outright. The event is never dispatched at all — not merely
+ * `preventDefault`ed — so the app's own handlers, including `maybeOpenSponsor`,
+ * don't run and the click doesn't navigate.
+ *
+ * `delayMs` is what makes the two units coexist. For the first minute there is
+ * no popunder on the page, so clicks reach the app normally and the direct link
+ * gets an uncontested shot at the visitor's opening gestures. After that the
+ * popunder arms and takes one click. Browsers allow roughly one `window.open`
+ * per gesture anyway, so they could never both fire on the same click.
+ *
+ * Measured from the start of the visit, not from mount, so reloads and deep
+ * links don't hand out a fresh countdown. Repeats after the first fire are
+ * governed by the network's own `pp_delay_` cookie — no client-side control.
+ *
+ * `src` = "" disables it.
+ */
+export const POPUNDER = {
+  src: "https://pl30425488.profitableratecpmnetwork.com/0d/e2/3b/0de23b3ffe0ffd0534cdac5c6cb49811.js",
+  delayMs: 15 * 1000,
 } as const;
 
 /**

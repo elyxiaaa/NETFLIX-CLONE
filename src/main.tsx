@@ -10,10 +10,10 @@ import "@fontsource/inter/800.css";
 import "@fontsource/bebas-neue/400.css";
 import "./index.css";
 import App from "./App.tsx";
-import { initSponsorCooldown } from "./utils/ads";
+import { initVisitClock } from "./utils/ads";
 
-// Before first paint, so a new visitor's opening clicks stay ad-free.
-initSponsorCooldown();
+// Stamp the visit start before first paint; the popunder arms a minute in.
+initVisitClock();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
