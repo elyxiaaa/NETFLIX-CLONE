@@ -10,8 +10,20 @@
  * page collide, since the widget mounts into `#container-<key>`.
  */
 
-/** Host serving the native-banner `invoke.js` (from the Adsterra unit's snippet). */
-export const NATIVE_BANNER_HOST = "pl31486079.profitableratecpmnetwork.com";
+/**
+ * Host serving the native-banner `invoke.js`.
+ *
+ * Adsterra's anti-adblock domain, same as the popunder and smartlink use. The
+ * old `pl31486079.profitableratecpmnetwork.com` is on the public filter lists,
+ * which made this unit — 58% of revenue — invisible to adblocked visitors.
+ *
+ * ⚠️ Unlike the other two, this URL was derived by pattern (same path + key on
+ * the anti-adblock host) rather than taken from the unit's settings page. It
+ * serves the correct script, but that isn't proof impressions attribute the
+ * same way. Check `NativeBanner_1` in the dashboard within a day of deploying:
+ * if its impressions flatline, put the old host back.
+ */
+export const NATIVE_BANNER_HOST = "screwbedriddenheadline.com";
 
 export interface NativeBanner {
   /** Adsterra placement key; `""` disables this slot. */
