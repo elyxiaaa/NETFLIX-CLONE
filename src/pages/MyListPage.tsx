@@ -32,7 +32,7 @@ export function MyListPage() {
       </h1>
 
       {movies.length > 0 ? (
-        <div className="flex flex-wrap justify-center gap-x-3 gap-y-6">
+        <div className="poster-grid gap-x-3 gap-y-6">
           {movies.map((movie) => (
             <MovieCard key={movie.id} movie={movie} poster />
           ))}

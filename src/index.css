@@ -29,6 +29,35 @@
 }
 
 @layer utilities {
+  /* Poster grid — fixed-width columns packed from the left, with the whole
+     track centred.
+
+     `flex-wrap` + `justify-center` centres every row, which leaves a short
+     final row floating in the middle. `justify-start` instead piles all the
+     leftover space on the right (~200px dead space on a wide screen). A grid
+     of fixed columns gets both: items stay left-aligned under column one, and
+     `justify-content: center` splits the leftover evenly, so it can never
+     exceed half a column on either side.
+
+     Column widths track `MovieCard`'s poster branch — keep them in step.
+     Callers supply their own `gap-*`; grid accounts for it when fitting
+     columns. */
+  .poster-grid {
+    display: grid;
+    justify-content: center;
+    grid-template-columns: repeat(auto-fill, 158px);
+  }
+  @media (min-width: 640px) {
+    .poster-grid {
+      grid-template-columns: repeat(auto-fill, 176px);
+    }
+  }
+  @media (min-width: 768px) {
+    .poster-grid {
+      grid-template-columns: repeat(auto-fill, 196px);
+    }
+  }
+
   /* Horizontally scrollable rows with no visible scrollbar */
   .hide-scrollbar {
     -ms-overflow-style: none;
