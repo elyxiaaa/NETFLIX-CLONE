@@ -57,38 +57,57 @@ export const IN_FEED_AFTER_ROW = 1;
  * on (measured — the click never reaches the page, so the visitor's tap does
  * nothing). Opening the tab from our own handler leaves the click intact.
  *
- * Firing is gated three ways, all checked in `maybeOpenSponsor`:
- *   1. `graceClicks` — the opening gestures of a visit never fire
- *   2. `probability` — past the grace, each qualifying click is a dice roll
- *   3. `cooldownMs`  — a hard floor between opens, however the dice land
+ * Firing is gated four ways, all checked in `maybeOpenSponsor`:
+ *   1. `armAfterMs`  — nothing fires until the visit is this old
+ *   2. `graceClicks` — the opening gestures of a visit never fire
+ *   3. `probability` — past those, each qualifying click is a dice roll
+ *   4. `cooldownMs`  — a hard floor between opens, however the dice land
  *
- * Note the *rate* is a direct-link rate. Adsterra's popunder unit is a separate
- * product with its own (higher) pricing, and it's script-based, so it can't be
- * swapped in by changing `url` here — it would mean re-adding their script and
- * taking the gesture-swallowing back with it.
+ * Note the *rate* is a direct-link rate, lower than the popunder unit's — see
+ * `POPUNDER` below, which is the script-based product and runs alongside this.
  */
 export const SPONSOR = {
   /** Direct-link URL from the Adsterra unit. `""` disables the pop entirely. */
   url: "https://www.effectivecpmnetwork.com/nyfb4ufr6z?key=75ffa84acaf66abd5c01c978533654e9",
 
   /**
-   * Qualifying clicks let through untouched at the start of each visit.
-   * Counted per browser tab/session, so every new visit gets its own grace.
+   * Time on site before anything can fire, measured from the first page of the
+   * visit and carried across reloads and route changes. The primary control:
+   * a visitor browses uninterrupted for this long, then ads become eligible.
+   */
+  armAfterMs: 5 * 60 * 1000,
+
+  /**
+   * Qualifying clicks let through untouched at the start of each visit. Mostly
+   * already spent by the time `armAfterMs` elapses; it matters for someone who
+   * sits on one page (watching) and then starts clicking.
    */
   graceClicks: 3,
 
-  /** Chance (0–1) that a qualifying click past the grace opens the tab. */
+  /** Chance (0–1) that a qualifying click past the gates opens the tab. */
   probability: 0.25,
 
   /** Hard minimum between two opens. */
   cooldownMs: 15 * 60 * 1000,
+} as const;
 
-  /**
-   * Also keep a brand-new visitor's first `cooldownMs` quiet, across sessions.
-   * `graceClicks` already protects the start of every visit, so this is the
-   * stricter, first-impression-only guard — set false to monetize sooner.
-   */
-  seedOnFirstVisit: true,
+/**
+ * Adsterra popunder — the script-based unit, re-enabled on a delay.
+ *
+ * Earned 2.8x more per impression than the native banner (37% of revenue from
+ * 17% of impressions), which is why it's back. The cost is real and measured:
+ * once this script is on the page it consumes the next click outright — the
+ * event never reaches the app, so that tap does nothing.
+ *
+ * Injecting it `delayMs` into the visit instead of from `index.html` means the
+ * tap it eats is never the visitor's first. Its own cookie cap (`pp_delay_`)
+ * governs repeats after that; there is no client-side control over its rate.
+ *
+ * `src` = "" disables it.
+ */
+export const POPUNDER = {
+  src: "https://pl30425488.profitableratecpmnetwork.com/0d/e2/3b/0de23b3ffe0ffd0534cdac5c6cb49811.js",
+  delayMs: 5 * 60 * 1000,
 } as const;
 
 /**
