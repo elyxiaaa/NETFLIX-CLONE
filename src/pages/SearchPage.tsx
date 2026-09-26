@@ -48,7 +48,7 @@ export function SearchPage() {
           {loading ? (
             <PosterGridSkeleton />
           ) : data.length > 0 ? (
-            <div className="flex flex-wrap gap-3">
+            <div className="poster-grid gap-x-3 gap-y-6">
               {data.map((movie) => (
                 <MovieCard key={movie.id} movie={movie} poster />
               ))}
@@ -145,11 +145,11 @@ function EmptyPrompt() {
 
 function PosterGridSkeleton() {
   return (
-    <div className="flex flex-wrap gap-3">
+    <div className="poster-grid gap-x-3 gap-y-6">
       {Array.from({ length: 12 }).map((_, i) => (
         <div
           key={i}
-          className="shimmer aspect-[2/3] w-[140px] rounded-lg bg-brand-gray sm:w-[150px] md:w-[170px]"
+          className="shimmer aspect-[2/3] w-full rounded-xl bg-brand-gray"
         />
       ))}
     </div>
