@@ -25,6 +25,7 @@ import {
   SearchIcon,
 } from "./icons";
 import { SearchBox } from "./SearchBox";
+import { DownloadButton } from "./DownloadButton";
 import { maybeOpenSponsor } from "../utils/ads";
 
 const NAV_LINKS = [
@@ -128,6 +129,10 @@ export function Navbar() {
         </div>
 
         <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+          {/* Unavailable on purpose — see DownloadButton. Sits next to the
+              community link because that's what it points people towards. */}
+          <DownloadButton />
+
           {/* Reads as a utility link, same weight as the nav items — not a CTA.
               Below lg it collapses to the bare mark; phones find it in the drawer. */}
           <a

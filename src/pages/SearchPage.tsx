@@ -1,6 +1,7 @@
 /** Search results (`/search?q=…`) — a poster grid driven by the search field. */
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { DISCORD_URL } from "../config";
 import { useSearch } from "../hooks/useSearch";
 import { useDocumentMeta } from "../hooks/useDocumentMeta";
 import { MovieCard } from "../components/MovieCard";
@@ -54,7 +55,16 @@ export function SearchPage() {
             </div>
           ) : (
             <p className="text-white/60">
-              No titles found for “{q}”. Try another title or genre.
+              No titles found for “{q}”. Try another title or genre — or{" "}
+              <a
+                href={DISCORD_URL}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="font-medium text-brand-gold underline-offset-4 hover:underline"
+              >
+                request it in our community
+              </a>
+              .
             </p>
           )}
         </>

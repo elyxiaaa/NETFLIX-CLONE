@@ -215,6 +215,15 @@ export function HeartIcon({ filled = false, ...props }: IconProps & { filled?: b
   );
 }
 
+export function DownloadIcon(props: IconProps) {
+  return (
+    <svg fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" {...base(props)}>
+      <path d="M12 3v12M8.5 11.5 12 15l3.5-3.5" />
+      <path d="M5 17v2a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2" />
+    </svg>
+  );
+}
+
 export function ShareIcon(props: IconProps) {
   return (
     <svg fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" {...base(props)}>
