@@ -2,13 +2,13 @@
  * Adsterra popunder loader, injected `POPUNDER.delayMs` into the visit.
  *
  * It used to sit in `index.html`, which armed it at parse time — before the
- * visitor had done anything, and before the direct link had any chance to fire,
- * because this script consumes the next click outright (the event is never
- * dispatched, so `maybeOpenSponsor` never runs and the click doesn't navigate).
+ * visitor had done anything. That matters because this script consumes the next
+ * click outright: the event is never dispatched, so the app's own handlers
+ * don't run and the click doesn't navigate.
  *
- * Holding it back for the first minute gives the direct link an uncontested run
- * at the opening gestures, then arms the higher-rate unit for the rest of the
- * visit. See `POPUNDER` in `config/ads.ts` for the full reasoning.
+ * Holding it back even briefly means the click it eats is never someone's
+ * first, while keeping the higher-rate unit armed for nearly all of the visit.
+ * See `POPUNDER` in `config/ads.ts` for the measured rationale.
  *
  * The delay is measured from the start of the visit, not from mount, so reloads
  * and deep links don't restart the countdown. Mounted once from `Layout`, it

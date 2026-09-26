@@ -107,7 +107,7 @@ export const SPONSOR = {
  */
 export const POPUNDER = {
   src: "https://pl30425488.profitableratecpmnetwork.com/0d/e2/3b/0de23b3ffe0ffd0534cdac5c6cb49811.js",
-  delayMs: 60 * 1000,
+  delayMs: 15 * 1000,
 } as const;
 
 /**
