@@ -10,8 +10,20 @@
  * page collide, since the widget mounts into `#container-<key>`.
  */
 
-/** Host serving the native-banner `invoke.js` (from the Adsterra unit's snippet). */
-export const NATIVE_BANNER_HOST = "pl31486079.profitableratecpmnetwork.com";
+/**
+ * Host serving the native-banner `invoke.js`.
+ *
+ * Adsterra's anti-adblock domain, same as the popunder and smartlink use. The
+ * old `pl31486079.profitableratecpmnetwork.com` is on the public filter lists,
+ * which made this unit — 58% of revenue — invisible to adblocked visitors.
+ *
+ * Confirmed against the unit's own snippet: `AdBanner` emits exactly
+ * `https://screwbedriddenheadline.com/<key>/invoke.js` with `data-cfasync`
+ * false, into `#container-<key>` — the snippet's script/div order is reversed
+ * on purpose, since mounting the container first means the widget can never
+ * execute before its target exists.
+ */
+export const NATIVE_BANNER_HOST = "screwbedriddenheadline.com";
 
 export interface NativeBanner {
   /** Adsterra placement key; `""` disables this slot. */
@@ -62,8 +74,14 @@ export const IN_FEED_AFTER_ROW = 1;
  * revenue data over that window is in the commit history.
  */
 export const SPONSOR = {
-  /** Direct-link URL from the Adsterra unit. `""` disables the pop entirely. */
-  url: "https://www.effectivecpmnetwork.com/nyfb4ufr6z?key=75ffa84acaf66abd5c01c978533654e9",
+  /**
+   * Direct-link URL from the Adsterra unit. `""` disables the pop entirely.
+   *
+   * Adsterra's anti-adblock domain — same path and key as the old
+   * `www.effectivecpmnetwork.com` URL, served from a host that isn't on the
+   * public filter lists. Swap it here if the network rotates domains.
+   */
+  url: "https://screwbedriddenheadline.com/nyfb4ufr6z?key=75ffa84acaf66abd5c01c978533654e9",
 
   /**
    * Time on site before the link can fire, measured from the first page of the
@@ -106,7 +124,13 @@ export const SPONSOR = {
  * `src` = "" disables it.
  */
 export const POPUNDER = {
-  src: "https://pl30425488.profitableratecpmnetwork.com/0d/e2/3b/0de23b3ffe0ffd0534cdac5c6cb49811.js",
+  /**
+   * Adsterra's anti-adblock domain — same path and hash as the old
+   * `pl30425488.profitableratecpmnetwork.com` URL, served from a host that
+   * isn't on the public filter lists. Swap it here if the network rotates
+   * domains; the script itself is unchanged.
+   */
+  src: "https://screwbedriddenheadline.com/0d/e2/3b/0de23b3ffe0ffd0534cdac5c6cb49811.js",
   delayMs: 15 * 1000,
 } as const;
 
