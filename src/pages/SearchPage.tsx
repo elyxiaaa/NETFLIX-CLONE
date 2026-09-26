@@ -48,7 +48,7 @@ export function SearchPage() {
           {loading ? (
             <PosterGridSkeleton />
           ) : data.length > 0 ? (
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap justify-center gap-3">
               {data.map((movie) => (
                 <MovieCard key={movie.id} movie={movie} poster />
               ))}
@@ -145,7 +145,7 @@ function EmptyPrompt() {
 
 function PosterGridSkeleton() {
   return (
-    <div className="flex flex-wrap gap-3">
+    <div className="flex flex-wrap justify-center gap-3">
       {Array.from({ length: 12 }).map((_, i) => (
         <div
           key={i}

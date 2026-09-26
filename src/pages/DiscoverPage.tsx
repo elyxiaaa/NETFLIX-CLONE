@@ -79,7 +79,7 @@ function DiscoverGrid({
         <p className="text-white/60">Couldn&apos;t load this category. Please try again.</p>
       ) : items.length > 0 ? (
         <>
-          <div className="flex flex-wrap gap-x-3 gap-y-6">
+          <div className="flex flex-wrap justify-center gap-x-3 gap-y-6">
             {items.map((movie) => (
               <MovieCard key={movie.id} movie={movie} poster />
             ))}
@@ -109,7 +109,7 @@ function DiscoverGrid({
 
 function PosterGridSkeleton() {
   return (
-    <div className="flex flex-wrap gap-x-3 gap-y-6">
+    <div className="flex flex-wrap justify-center gap-x-3 gap-y-6">
       {Array.from({ length: 14 }).map((_, i) => (
         <div
           key={i}
