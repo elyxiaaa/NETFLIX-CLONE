@@ -70,7 +70,33 @@ export const SPONSOR = {
    * *second* open: a visitor with no stored timestamp reads as ~56 years
    * elapsed, so the first qualifying click of a new browser always fires.
    */
-  cooldownMs: 30 * 60 * 1000,
+  cooldownMs: 15 * 60 * 1000,
+} as const;
+
+/**
+ * Adsterra popunder — the script-based unit, armed a short way into the visit.
+ *
+ * Earns ~2.8x the native banner per impression, so it stays. The cost is
+ * measured and unavoidable: once this script is on the page it consumes the
+ * next click outright. The event is never dispatched at all — not merely
+ * `preventDefault`ed — so the app's own handlers, including `maybeOpenSponsor`,
+ * don't run and the click doesn't navigate.
+ *
+ * `delayMs` is what makes the two units coexist. For the first minute there is
+ * no popunder on the page, so clicks reach the app normally and the direct link
+ * gets an uncontested shot at the visitor's opening gestures. After that the
+ * popunder arms and takes one click. Browsers allow roughly one `window.open`
+ * per gesture anyway, so they could never both fire on the same click.
+ *
+ * Measured from the start of the visit, not from mount, so reloads and deep
+ * links don't hand out a fresh countdown. Repeats after the first fire are
+ * governed by the network's own `pp_delay_` cookie — no client-side control.
+ *
+ * `src` = "" disables it.
+ */
+export const POPUNDER = {
+  src: "https://pl30425488.profitableratecpmnetwork.com/0d/e2/3b/0de23b3ffe0ffd0534cdac5c6cb49811.js",
+  delayMs: 60 * 1000,
 } as const;
 
 /**
