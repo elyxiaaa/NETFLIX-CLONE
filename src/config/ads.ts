@@ -17,11 +17,11 @@
  * old `pl31486079.profitableratecpmnetwork.com` is on the public filter lists,
  * which made this unit — 58% of revenue — invisible to adblocked visitors.
  *
- * ⚠️ Unlike the other two, this URL was derived by pattern (same path + key on
- * the anti-adblock host) rather than taken from the unit's settings page. It
- * serves the correct script, but that isn't proof impressions attribute the
- * same way. Check `NativeBanner_1` in the dashboard within a day of deploying:
- * if its impressions flatline, put the old host back.
+ * Confirmed against the unit's own snippet: `AdBanner` emits exactly
+ * `https://screwbedriddenheadline.com/<key>/invoke.js` with `data-cfasync`
+ * false, into `#container-<key>` — the snippet's script/div order is reversed
+ * on purpose, since mounting the container first means the widget can never
+ * execute before its target exists.
  */
 export const NATIVE_BANNER_HOST = "screwbedriddenheadline.com";
 
