@@ -2,12 +2,13 @@
  * Sponsor monetization (Adsterra direct link, opened popunder-style).
  *
  * Opens the sponsor link at most **once per `SPONSOR.cooldownMs`** (shared
- * across tabs and reloads), in direct response to a user gesture.
+ * across tabs and reloads), in direct response to a user gesture, and never
+ * before the visit is `SPONSOR.armAfterMs` old.
  *
- * Note the cooldown can only ever suppress a *second* open: a visitor with no
- * stored timestamp has an elapsed time of ~56 years, so the first qualifying
- * click of a new browser always fires. That is intended here — the delayed and
- * probabilistic variants were tried and firing dropped too far.
+ * The time gate is doing work the cooldown cannot: a visitor with no stored
+ * timestamp reads as ~56 years elapsed, so without it the first click of a new
+ * browser always fired. It shares the visit clock with the popunder, which
+ * arms on the same schedule.
  *
  * Must be called synchronously inside the click/tap handler, or the browser's
  * popup blocker will drop the window.
@@ -61,6 +62,10 @@ export function elapsedThisVisit(): number {
 
 export function maybeOpenSponsor(): void {
   if (typeof window === "undefined" || !SPONSOR.url) return;
+
+  // Nothing fires until the visit is old enough, so a visitor's first clicks
+  // are always just clicks.
+  if (elapsedThisVisit() < SPONSOR.armAfterMs) return;
 
   try {
     const last = Number(localStorage.getItem(LAST_SHOWN_KEY)) || 0;

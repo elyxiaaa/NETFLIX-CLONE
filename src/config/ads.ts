@@ -66,10 +66,15 @@ export const SPONSOR = {
   url: "https://www.effectivecpmnetwork.com/nyfb4ufr6z?key=75ffa84acaf66abd5c01c978533654e9",
 
   /**
-   * Minimum gap between two opens, per browser. Note this can only suppress a
-   * *second* open: a visitor with no stored timestamp reads as ~56 years
-   * elapsed, so the first qualifying click of a new browser always fires.
+   * Time on site before the link can fire, measured from the first page of the
+   * visit. Without it the very first click of a new browser always opened an
+   * ad — the cooldown can't prevent that, since an unset timestamp reads as
+   * ~56 years elapsed. Landing on a site and having the first button you touch
+   * spawn an ad tab reads as a scam, whatever the button was.
    */
+  armAfterMs: 60 * 1000,
+
+  /** Minimum gap between two opens, per browser, once armed. */
   cooldownMs: 15 * 60 * 1000,
 } as const;
 
