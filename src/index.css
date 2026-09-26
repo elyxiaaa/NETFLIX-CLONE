@@ -42,20 +42,39 @@
      Column widths track `MovieCard`'s poster branch — keep them in step.
      Callers supply their own `gap-*`; grid accounts for it when fitting
      columns. */
-  .poster-grid {
+  .poster-grid,
+  .poster-page {
     display: grid;
     justify-content: center;
     grid-template-columns: repeat(auto-fill, 158px);
   }
   @media (min-width: 640px) {
-    .poster-grid {
+    .poster-grid,
+    .poster-page {
       grid-template-columns: repeat(auto-fill, 176px);
     }
   }
   @media (min-width: 768px) {
-    .poster-grid {
+    .poster-grid,
+    .poster-page {
       grid-template-columns: repeat(auto-fill, 196px);
     }
+  }
+
+  /* Page wrapper that puts a heading on the same centred track as its poster
+     grid. Sharing the column definition means the outer track resolves to the
+     same width; every direct child spans it, so a heading starts exactly at
+     column one, and a nested `.poster-grid` — being exactly one track wide —
+     then fits the same number of columns and lines up cell for cell.
+
+     Row gap replaces the headings' old `mb-6` (both 1.5rem). */
+  .poster-page {
+    column-gap: 0.75rem;
+    row-gap: 1.5rem;
+  }
+  .poster-page > * {
+    grid-column: 1 / -1;
+    min-width: 0;
   }
 
   /* Horizontally scrollable rows with no visible scrollbar */

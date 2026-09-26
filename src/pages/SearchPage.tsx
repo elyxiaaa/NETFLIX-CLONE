@@ -22,19 +22,19 @@ export function SearchPage() {
   });
 
   return (
-    <div className="min-h-screen px-4 pb-16 pt-24 md:px-12 md:pt-28">
+    <div className="poster-page min-h-screen px-4 pb-16 pt-24 md:px-12 md:pt-28">
       {/* Phones drive search from here rather than the navbar: this is a real,
           always-present input the user taps directly, so the on-screen keyboard
           opens natively. (iOS Safari only raises the keyboard for a focus() call
           inside the user gesture, which the navbar's expand animation can't do.)
           Desktop keeps using the navbar box, so this is hidden from md up. */}
-      <SearchField className="mb-7 md:hidden" />
+      <SearchField className="md:hidden" />
 
       {!hasQuery ? (
         <EmptyPrompt />
       ) : (
         <>
-          <h1 className="mb-6 flex items-center gap-2.5 text-lg text-white/70 md:text-xl">
+          <h1 className="flex items-center gap-2.5 text-lg text-white/70 md:text-xl">
             <span aria-hidden="true" className="h-5 w-1 rounded-full bg-brand-gold md:h-6" />
             {loading ? (
               "Searching…"

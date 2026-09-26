@@ -22,8 +22,8 @@ export function MyListPage() {
   });
 
   return (
-    <div className="min-h-screen px-4 pb-16 pt-24 md:px-12 md:pt-28">
-      <h1 className="mb-6 flex items-center gap-2.5 text-lg text-white md:text-xl">
+    <div className="poster-page min-h-screen px-4 pb-16 pt-24 md:px-12 md:pt-28">
+      <h1 className="flex items-center gap-2.5 text-lg text-white md:text-xl">
         <span aria-hidden className="h-5 w-1 rounded-full bg-brand-gold md:h-6" />
         <span className="font-semibold">My List</span>
         {movies.length > 0 && (
