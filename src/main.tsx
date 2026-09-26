@@ -10,11 +10,6 @@ import "@fontsource/inter/800.css";
 import "@fontsource/bebas-neue/400.css";
 import "./index.css";
 import App from "./App.tsx";
-import { initVisitClock } from "./utils/ads";
-
-// Start the visit clock before first paint — ads arm a few minutes in, and the
-// clock has to be stamped before anything can measure against it.
-initVisitClock();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

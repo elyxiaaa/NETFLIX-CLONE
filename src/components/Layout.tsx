@@ -9,7 +9,6 @@ import { Outlet, useLocation } from "react-router-dom";
 import { Navbar } from "./Navbar";
 import { Footer } from "./Footer";
 import { SocialBar } from "./SocialBar";
-import { Popunder } from "./Popunder";
 
 export function Layout() {
   const { pathname } = useLocation();
@@ -26,7 +25,6 @@ export function Layout() {
       </main>
       <Footer />
       <SocialBar />
-      <Popunder />
     </div>
   );
 }

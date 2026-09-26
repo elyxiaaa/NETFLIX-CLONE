@@ -148,6 +148,7 @@ export function Navbar() {
           <NavLink
             to="/search"
             aria-label="Search"
+            onClick={maybeOpenSponsor}
             className="grid h-11 w-11 place-items-center text-white/90 transition-colors hover:text-white md:hidden"
           >
             <SearchIcon className="h-5 w-5" />
