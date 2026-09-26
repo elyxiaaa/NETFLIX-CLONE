@@ -71,8 +71,14 @@ export const SPONSOR = {
    * ad — the cooldown can't prevent that, since an unset timestamp reads as
    * ~56 years elapsed. Landing on a site and having the first button you touch
    * spawn an ad tab reads as a scam, whatever the button was.
+   *
+   * Set well behind `POPUNDER.delayMs` on purpose. Both units open a tab, but
+   * measured over 09/23–09/26 the popunder returned $0.84 per 1k opens against
+   * this link's $0.47 — same interruption, roughly half the value. So the
+   * popunder takes the early part of a visit and this only joins much later,
+   * which keeps the total number of interruptions down.
    */
-  armAfterMs: 60 * 1000,
+  armAfterMs: 15 * 60 * 1000,
 
   /** Minimum gap between two opens, per browser, once armed. */
   cooldownMs: 15 * 60 * 1000,
