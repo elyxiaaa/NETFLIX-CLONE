@@ -24,7 +24,6 @@ import { getTitleDetails, getSimilar, getSeasonEpisodes } from "../services/movi
 import { buildImageUrl, gradientFromId } from "../utils/images";
 import { genreNames, getYear } from "../utils/genres";
 import { watchPath, type MediaType } from "../utils/routes";
-import { maybeOpenSponsor } from "../utils/ads";
 import { useDocumentMeta, type DocumentMeta } from "../hooks/useDocumentMeta";
 import { NATIVE_BANNERS } from "../config/ads";
 import { AdBanner } from "../components/AdBanner";
@@ -282,13 +281,11 @@ function TitleView({
   useDocumentMeta(titleMeta(movie, mediaType, genres));
 
   const startPlay = useCallback(() => {
-    maybeOpenSponsor();
     setPlaying(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
   const playEpisode = useCallback((season: number, episode: number) => {
-    maybeOpenSponsor();
     setActive({ season, episode });
     setPlaying(true);
     window.scrollTo({ top: 0, behavior: "smooth" });

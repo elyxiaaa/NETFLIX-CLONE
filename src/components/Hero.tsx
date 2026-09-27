@@ -12,7 +12,6 @@ import type { Movie } from "../types/movie";
 import { buildImageUrl, gradientFromId } from "../utils/images";
 import { genreNames, matchScore, getYear } from "../utils/genres";
 import { watchPath } from "../utils/routes";
-import { maybeOpenSponsor } from "../utils/ads";
 import { getTrailerKey } from "../services/movies";
 import { BRAND_NAME } from "../config";
 import { getCardBadge } from "../utils/badges";
@@ -26,7 +25,6 @@ const TV_GENRES = new Set([10759, 10762, 10763, 10764, 10765, 10766, 10767, 1076
 export function Hero({ movie }: { movie: Movie }) {
   const navigate = useNavigate();
   const openTitle = () => {
-    maybeOpenSponsor();
     navigate(watchPath(movie), { state: { movie } });
   };
 
