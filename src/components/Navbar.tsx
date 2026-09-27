@@ -26,7 +26,6 @@ import {
 } from "./icons";
 import { SearchBox } from "./SearchBox";
 import { DownloadButton } from "./DownloadButton";
-import { maybeOpenSponsor } from "../utils/ads";
 
 const NAV_LINKS = [
   { label: "Home", to: "/", end: true },
@@ -107,7 +106,6 @@ export function Navbar() {
           <NavLink
             to="/"
             aria-label={`${BRAND_NAME} home`}
-            onClick={maybeOpenSponsor}
             className="shrink-0"
           >
             <BrandWordmark className="text-xl md:text-2xl" />
@@ -153,7 +151,6 @@ export function Navbar() {
           <NavLink
             to="/search"
             aria-label="Search"
-            onClick={maybeOpenSponsor}
             className="grid h-11 w-11 place-items-center text-white/90 transition-colors hover:text-white md:hidden"
           >
             <SearchIcon className="h-5 w-5" />

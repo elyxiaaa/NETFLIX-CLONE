@@ -13,7 +13,7 @@
 /**
  * Host serving the native-banner `invoke.js`.
  *
- * Adsterra's anti-adblock domain, same as the popunder and smartlink use. The
+ * Adsterra's anti-adblock domain, same as the popunder uses. The
  * old `pl31486079.profitableratecpmnetwork.com` is on the public filter lists,
  * which made this unit — 58% of revenue — invisible to adblocked visitors.
  *
@@ -62,60 +62,17 @@ export const NATIVE_BANNERS = {
 export const IN_FEED_AFTER_ROW = 1;
 
 /**
- * Sponsor pop — a self-controlled popunder built on the Adsterra direct link.
- *
- * Runs alongside the Adsterra popunder script in `index.html`. That one is the
- * higher-rate product but consumes the click it fires on; this one opens from
- * our own handler and leaves the click intact, so the two cover different
- * gestures.
- *
- * A single cooldown is the only gate. Time-delayed and probabilistic variants
- * were tried on 2026-09-25/26 and firing dropped too far to be worth it — the
- * revenue data over that window is in the commit history.
- */
-export const SPONSOR = {
-  /**
-   * Direct-link URL from the Adsterra unit. `""` disables the pop entirely.
-   *
-   * Adsterra's anti-adblock domain — same path and key as the old
-   * `www.effectivecpmnetwork.com` URL, served from a host that isn't on the
-   * public filter lists. Swap it here if the network rotates domains.
-   */
-  url: "https://screwbedriddenheadline.com/nyfb4ufr6z?key=75ffa84acaf66abd5c01c978533654e9",
-
-  /**
-   * Time on site before the link can fire, measured from the first page of the
-   * visit. Without it the very first click of a new browser always opened an
-   * ad — the cooldown can't prevent that, since an unset timestamp reads as
-   * ~56 years elapsed. Landing on a site and having the first button you touch
-   * spawn an ad tab reads as a scam, whatever the button was.
-   *
-   * Set well behind `POPUNDER.delayMs` on purpose. Both units open a tab, but
-   * measured over 09/23–09/26 the popunder returned $0.84 per 1k opens against
-   * this link's $0.47 — same interruption, roughly half the value. So the
-   * popunder takes the early part of a visit and this only joins much later,
-   * which keeps the total number of interruptions down.
-   */
-  armAfterMs: 15 * 60 * 1000,
-
-  /** Minimum gap between two opens, per browser, once armed. */
-  cooldownMs: 15 * 60 * 1000,
-} as const;
-
-/**
  * Adsterra popunder — the script-based unit, armed a short way into the visit.
  *
  * Earns ~2.8x the native banner per impression, so it stays. The cost is
  * measured and unavoidable: once this script is on the page it consumes the
  * next click outright. The event is never dispatched at all — not merely
- * `preventDefault`ed — so the app's own handlers, including `maybeOpenSponsor`,
- * don't run and the click doesn't navigate.
+ * `preventDefault`ed — so the app's own handlers don't run and the click
+ * doesn't navigate.
  *
- * `delayMs` is what makes the two units coexist. For the first minute there is
- * no popunder on the page, so clicks reach the app normally and the direct link
- * gets an uncontested shot at the visitor's opening gestures. After that the
- * popunder arms and takes one click. Browsers allow roughly one `window.open`
- * per gesture anyway, so they could never both fire on the same click.
+ * `delayMs` keeps a visitor's opening clicks clean: until it passes there is no
+ * popunder on the page, so clicks reach the app normally. After that the
+ * popunder arms and takes one click.
  *
  * Measured from the start of the visit, not from mount, so reloads and deep
  * links don't hand out a fresh countdown. Repeats after the first fire are

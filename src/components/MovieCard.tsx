@@ -19,7 +19,6 @@ import type { Movie } from "../types/movie";
 import { buildImageUrl, gradientFromId } from "../utils/images";
 import { getYear } from "../utils/genres";
 import { watchPath } from "../utils/routes";
-import { maybeOpenSponsor } from "../utils/ads";
 import { StarIcon } from "./icons";
 import { FavoriteButton } from "./FavoriteButton";
 
@@ -35,7 +34,6 @@ export function MovieCard({ movie, poster = false, rank }: MovieCardProps) {
   const navigate = useNavigate();
   // The movie rides along in router state so the title page paints without a refetch.
   const openTitle = () => {
-    maybeOpenSponsor();
     navigate(watchPath(movie), { state: { movie } });
   };
   const [imgFailed, setImgFailed] = useState(false);
