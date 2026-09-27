@@ -10,7 +10,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import { useNoContextMenu } from "../hooks/useNoContextMenu";
 import { Navbar } from "./Navbar";
 import { Footer } from "./Footer";
-import { RequestCTA } from "./RequestCTA";
+import { CommunityCTA } from "./CommunityCTA";
 import { SocialBar } from "./SocialBar";
 import { Popunder } from "./Popunder";
 
@@ -29,7 +29,7 @@ export function Layout() {
       <main>
         <Outlet />
       </main>
-      <RequestCTA />
+      <CommunityCTA />
       <Footer />
       <SocialBar />
       <Popunder />
