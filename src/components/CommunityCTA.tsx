@@ -1,9 +1,9 @@
 /**
  * Community call-to-action — the one place the site asks for something back.
  *
- * Framed around requesting titles rather than "join our Discord", because the
- * ask lands better when it answers a problem the visitor already has: they
- * looked for something and we don't carry it.
+ * The pitch is continuity rather than chat: a site like this moves domains, and
+ * Discord is how someone finds it again when it does. That's the strongest
+ * reason to join, so it leads. Announcements and playback help follow.
  *
  * Rendered once per page from `Layout`, above the footer.
  */
@@ -11,7 +11,10 @@ import { DISCORD_URL } from "../config";
 import { buttonClasses } from "./buttonStyles";
 import { DiscordIcon } from "./icons";
 
-export function RequestCTA({ className = "" }: { className?: string }) {
+/** What the server is actually used for — set expectations before the click. */
+const TAGS = ["Site updates", "Report issues", "New links"];
+
+export function CommunityCTA({ className = "" }: { className?: string }) {
   return (
     <section className={`px-4 pb-4 pt-10 md:px-12 ${className}`}>
       <div className="mx-auto flex max-w-3xl flex-col items-center gap-5 rounded-xl bg-brand-dark px-6 py-9 text-center ring-1 ring-white/10 sm:px-10">
@@ -24,13 +27,24 @@ export function RequestCTA({ className = "" }: { className?: string }) {
 
         <div className="space-y-2">
           <h2 className="font-display text-3xl uppercase leading-none tracking-wide text-white sm:text-4xl">
-            Can&apos;t find what you want?
+            Don&apos;t lose access
           </h2>
           <p className="mx-auto max-w-md text-sm leading-relaxed text-white/60">
-            Join our community and request any movie or series — tell us what to
-            add next and we&apos;ll get it on the site.
+            Join our Discord for announcements, backup domains when the site
+            moves, and help with playback or broken links.
           </p>
         </div>
+
+        <ul className="flex flex-wrap justify-center gap-2">
+          {TAGS.map((tag) => (
+            <li
+              key={tag}
+              className="rounded-full bg-white/5 px-3 py-1 text-xs font-medium text-white/60 ring-1 ring-white/10"
+            >
+              {tag}
+            </li>
+          ))}
+        </ul>
 
         <a
           href={DISCORD_URL}
