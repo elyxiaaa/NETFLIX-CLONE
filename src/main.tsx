@@ -10,7 +10,12 @@ import "@fontsource/inter/800.css";
 import "@fontsource/bebas-neue/400.css";
 import "./index.css";
 import App from "./App.tsx";
+import { initPwa } from "./utils/pwa";
 import { initVisitClock } from "./utils/ads";
+
+// Capture Chrome's install prompt before render — it fires early and can't be
+// replayed — and register the service worker in production.
+initPwa();
 
 // Stamp the visit start before first paint; the popunder arms a minute in.
 initVisitClock();
