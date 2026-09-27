@@ -67,8 +67,13 @@
      column one, and a nested `.poster-grid` — being exactly one track wide —
      then fits the same number of columns and lines up cell for cell.
 
-     Row gap replaces the headings' old `mb-6` (both 1.5rem). */
+     Row gap replaces the headings' old `mb-6` (both 1.5rem).
+
+     `align-content: start` is load-bearing: these pages are `min-h-screen`, and
+     a grid otherwise stretches its rows to fill that height — which blew the
+     phone search field up to several times its size on the empty search page. */
   .poster-page {
+    align-content: start;
     column-gap: 0.75rem;
     row-gap: 1.5rem;
   }
