@@ -26,6 +26,7 @@ export interface PlayerServer {
 const PLAYER_PARAMS = "color=E5B80B&autoplay=true";
 
 const SERVER_1_BASE = "https://zxcstream.xyz/player";
+const SERVER_2_BASE = "https://vidsrc.to/embed";
 
 export const PLAYER_SERVERS: PlayerServer[] = [
   {
@@ -37,15 +38,12 @@ export const PLAYER_SERVERS: PlayerServer[] = [
       `${SERVER_1_BASE}/tv/${tmdbId}/${season}/${episode}?${PLAYER_PARAMS}`,
   },
   {
-    // Not configured yet. Fill in the two builders and flip `enabled` to true —
-    // that's the whole change. Most providers follow the same
-    // `/movie/<tmdbId>` and `/tv/<tmdbId>/<season>/<episode>` shape as above,
-    // but check the query string, since those differ more often than the path.
     id: "s2",
     label: "Server 2",
-    enabled: false,
-    movieUrl: () => "",
-    tvUrl: () => "",
+    enabled: true,
+    movieUrl: (tmdbId) => `${SERVER_2_BASE}/movie/${tmdbId}`,
+    tvUrl: (tmdbId, season, episode) =>
+      `${SERVER_2_BASE}/tv/${tmdbId}/${season}/${episode}`,
   },
 ];
 
