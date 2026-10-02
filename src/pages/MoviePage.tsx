@@ -26,7 +26,14 @@ import { genreNames, getYear } from "../utils/genres";
 import { watchPath, type MediaType } from "../utils/routes";
 import { useDocumentMeta, type DocumentMeta } from "../hooks/useDocumentMeta";
 import { NATIVE_BANNERS } from "../config/ads";
+import {
+  PLAYER_SERVERS,
+  PLAYER_SERVER_KEY,
+  storedServer,
+  type PlayerServer,
+} from "../config/players";
 import { AdBanner } from "../components/AdBanner";
+import { ServerSwitcher } from "../components/ServerSwitcher";
 import { FavoriteButton } from "../components/FavoriteButton";
 import { AmbientTrailer } from "../components/AmbientTrailer";
 import { toggleWatchlist, useIsInWatchlist } from "../hooks/useWatchlist";
@@ -45,13 +52,6 @@ import {
   FullscreenEnterIcon,
   FullscreenExitIcon,
 } from "../components/icons";
-
-const EMBED_BASE = "https://zxcstream.xyz/player";
-// Theme the player with our brand gold and start playback automatically.
-const PLAYER_PARAMS = "color=E5B80B&autoplay=true";
-const movieEmbed = (id: number) => `${EMBED_BASE}/movie/${id}?${PLAYER_PARAMS}`;
-const tvEmbed = (id: number, season: number, episode: number) =>
-  `${EMBED_BASE}/tv/${id}/${season}/${episode}?${PLAYER_PARAMS}`;
 
 /** Fullscreen-capable element/document, incl. the WebKit-prefixed variants. */
 type FsElement = HTMLDivElement & {
@@ -280,6 +280,19 @@ function TitleView({
 
   useDocumentMeta(titleMeta(movie, mediaType, genres));
 
+  // Remembered across titles, so someone who found a working source doesn't
+  // have to re-pick it on every episode.
+  const [server, setServer] = useState<PlayerServer>(storedServer);
+
+  const selectServer = useCallback((next: PlayerServer) => {
+    setServer(next);
+    try {
+      localStorage.setItem(PLAYER_SERVER_KEY, next.id);
+    } catch {
+      /* storage blocked — the choice just won't survive a reload */
+    }
+  }, []);
+
   const startPlay = useCallback(() => {
     setPlaying(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -305,7 +318,9 @@ function TitleView({
   }
 
   const isTV = mediaType === "tv";
-  const streamUrl = isTV ? tvEmbed(id, active.season, active.episode) : movieEmbed(id);
+  const streamUrl = isTV
+    ? server.tvUrl(id, active.season, active.episode)
+    : server.movieUrl(id);
 
   return (
     <div className="pb-16">
@@ -319,6 +334,16 @@ function TitleView({
         onBack={() => navigate(-1)}
         onSimilars={scrollToSimilar}
       />
+
+      {/* Only once the player is up — before that there's no failure to fix. */}
+      {playing && (
+        <ServerSwitcher
+          servers={PLAYER_SERVERS}
+          activeId={server.id}
+          onSelect={selectServer}
+          className="pt-5"
+        />
+      )}
 
       {/* Directly under the player — the longest-dwell surface on the site. */}
       <AdBanner placement={NATIVE_BANNERS.watch} className="py-6" />
