@@ -31,7 +31,11 @@ export function ServerSwitcher({
           <span className="text-white/70">Select servers here.</span>
         </p>
 
-        <div role="group" aria-label="Playback server" className="flex gap-2">
+        <div
+          role="group"
+          aria-label="Playback server"
+          className="flex flex-wrap justify-center gap-2"
+        >
           {servers.map((server) => {
             const active = server.id === activeId;
             return (

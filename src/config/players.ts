@@ -25,25 +25,58 @@ export interface PlayerServer {
 /** Theme the player with our brand gold and start playback automatically. */
 const PLAYER_PARAMS = "color=E5B80B&autoplay=true";
 
-const SERVER_1_BASE = "https://zxcstream.xyz/player";
-const SERVER_2_BASE = "https://vidsrc.to/embed";
+const ZXCSTREAM_BASE = "https://zxcstream.cc/player";
+const VIDLUX_BASE = "https://vidlux.xyz/embed";
+const VIDLINK_BASE = "https://vidlink.pro";
+const VIDSRC_PM_BASE = "https://vidsrc.pm/embed";
+const VIDSRC_TO_BASE = "https://vidsrc.to/embed";
 
+/*
+ * Ids name the provider rather than the slot, so reordering the backups never
+ * silently moves a viewer's saved choice onto a different provider. `s1`
+ * (ZxcStream) and `s2` (vidsrc.to) predate this scheme and are already stored,
+ * so they keep their old ids.
+ */
 export const PLAYER_SERVERS: PlayerServer[] = [
   {
     id: "s1",
-    label: "Server 1",
+    label: "Main Server",
     enabled: true,
-    movieUrl: (tmdbId) => `${SERVER_1_BASE}/movie/${tmdbId}?${PLAYER_PARAMS}`,
+    movieUrl: (tmdbId) => `${ZXCSTREAM_BASE}/movie/${tmdbId}?${PLAYER_PARAMS}`,
     tvUrl: (tmdbId, season, episode) =>
-      `${SERVER_1_BASE}/tv/${tmdbId}/${season}/${episode}?${PLAYER_PARAMS}`,
+      `${ZXCSTREAM_BASE}/tv/${tmdbId}/${season}/${episode}?${PLAYER_PARAMS}`,
+  },
+  {
+    id: "vidlux",
+    label: "Backup Server 1",
+    enabled: true,
+    movieUrl: (tmdbId) => `${VIDLUX_BASE}/movie/${tmdbId}`,
+    tvUrl: (tmdbId, season, episode) =>
+      `${VIDLUX_BASE}/tv/${tmdbId}/${season}/${episode}`,
+  },
+  {
+    id: "vidlink",
+    label: "Backup Server 2",
+    enabled: true,
+    movieUrl: (tmdbId) => `${VIDLINK_BASE}/movie/${tmdbId}`,
+    tvUrl: (tmdbId, season, episode) =>
+      `${VIDLINK_BASE}/tv/${tmdbId}/${season}/${episode}`,
+  },
+  {
+    id: "vidsrc-pm",
+    label: "Backup Server 3",
+    enabled: true,
+    movieUrl: (tmdbId) => `${VIDSRC_PM_BASE}/movie/${tmdbId}`,
+    tvUrl: (tmdbId, season, episode) =>
+      `${VIDSRC_PM_BASE}/tv/${tmdbId}/${season}/${episode}`,
   },
   {
     id: "s2",
-    label: "Server 2",
+    label: "Backup Server 4",
     enabled: true,
-    movieUrl: (tmdbId) => `${SERVER_2_BASE}/movie/${tmdbId}`,
+    movieUrl: (tmdbId) => `${VIDSRC_TO_BASE}/movie/${tmdbId}`,
     tvUrl: (tmdbId, season, episode) =>
-      `${SERVER_2_BASE}/tv/${tmdbId}/${season}/${episode}`,
+      `${VIDSRC_TO_BASE}/tv/${tmdbId}/${season}/${episode}`,
   },
 ];
 
