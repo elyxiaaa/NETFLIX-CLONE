@@ -11,25 +11,25 @@
  */
 
 /**
- * Host serving the native-banner `invoke.js`.
+ * Base URL of the native-banner script; `AdBanner` appends `/<key>`.
  *
- * Adsterra's anti-adblock domain, same as the popunder uses. The
- * old `pl31486079.profitableratecpmnetwork.com` is on the public filter lists,
- * which made this unit — 58% of revenue — invisible to adblocked visitors.
+ * Adsterra's anti-adblock domain, taken from the unit's current snippet. The
+ * network rotates these domains and changes the path shape with them (the old
+ * one was `https://<host>/<key>/invoke.js`), so copy the new snippet's URL up to
+ * the key when it changes.
  *
- * Confirmed against the unit's own snippet: `AdBanner` emits exactly
- * `https://screwbedriddenheadline.com/<key>/invoke.js` with `data-cfasync`
+ * `AdBanner` emits exactly `${NATIVE_BANNER_BASE}/<key>` with `data-cfasync`
  * false, into `#container-<key>` — the snippet's script/div order is reversed
  * on purpose, since mounting the container first means the widget can never
  * execute before its target exists.
  */
-export const NATIVE_BANNER_HOST = "screwbedriddenheadline.com";
+export const NATIVE_BANNER_BASE = "https://bancadeltempoidea.org/21";
 
 export interface NativeBanner {
   /** Adsterra placement key; `""` disables this slot. */
   key: string;
-  /** Host for this unit's script — usually `NATIVE_BANNER_HOST`. */
-  host: string;
+  /** Script URL up to the key — usually `NATIVE_BANNER_BASE`. */
+  scriptBase: string;
 }
 
 /**
@@ -44,13 +44,13 @@ export const NATIVE_BANNERS = {
   /** Browse pages, between the category rows. */
   inFeed: {
     key: "4b7d16d2094c6d475055f9ccfb2d813d",
-    host: NATIVE_BANNER_HOST,
+    scriptBase: NATIVE_BANNER_BASE,
   } satisfies NativeBanner,
 
   /** `/watch`, directly under the player — the site's highest-dwell surface. */
   watch: {
     key: "4b7d16d2094c6d475055f9ccfb2d813d",
-    host: NATIVE_BANNER_HOST,
+    scriptBase: NATIVE_BANNER_BASE,
   } satisfies NativeBanner,
 } as const;
 
@@ -82,12 +82,11 @@ export const IN_FEED_AFTER_ROW = 1;
  */
 export const POPUNDER = {
   /**
-   * Adsterra's anti-adblock domain — same path and hash as the old
-   * `pl30425488.profitableratecpmnetwork.com` URL, served from a host that
-   * isn't on the public filter lists. Swap it here if the network rotates
-   * domains; the script itself is unchanged.
+   * Full script URL from the unit's current snippet, on Adsterra's anti-adblock
+   * domain. The network rotates domains and path shapes together, so paste the
+   * whole new `src` here when it changes.
    */
-  src: "https://screwbedriddenheadline.com/0d/e2/3b/0de23b3ffe0ffd0534cdac5c6cb49811.js",
+  src: "https://aarems.org/1/0de23b3ffe0ffd0534cdac5c6cb49811",
   delayMs: 15 * 1000,
 } as const;
 

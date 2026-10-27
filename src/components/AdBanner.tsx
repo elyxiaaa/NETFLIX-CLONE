@@ -20,7 +20,7 @@ interface AdBannerProps {
 
 export function AdBanner({ placement, className = "" }: AdBannerProps) {
   const wrapRef = useRef<HTMLDivElement>(null);
-  const { key, host } = placement;
+  const { key, scriptBase } = placement;
 
   useEffect(() => {
     const wrap = wrapRef.current;
@@ -29,7 +29,7 @@ export function AdBanner({ placement, className = "" }: AdBannerProps) {
     const script = document.createElement("script");
     script.async = true;
     script.setAttribute("data-cfasync", "false");
-    script.src = `https://${host}/${key}/invoke.js`;
+    script.src = `${scriptBase}/${key}`;
     wrap.appendChild(script);
 
     return () => {
@@ -37,7 +37,7 @@ export function AdBanner({ placement, className = "" }: AdBannerProps) {
       const container = document.getElementById(`container-${key}`);
       if (container) container.innerHTML = "";
     };
-  }, [key, host]);
+  }, [key, scriptBase]);
 
   // An unconfigured slot renders nothing at all — no empty gap in the layout.
   if (!key) return null;
