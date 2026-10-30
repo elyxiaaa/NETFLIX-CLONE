@@ -33,6 +33,8 @@ export function Popunder() {
       if (alreadyLoaded()) return;
       const script = document.createElement("script");
       script.async = true;
+      // From the unit's snippet: keeps Cloudflare Rocket Loader from deferring it.
+      script.setAttribute("data-cfasync", "false");
       script.src = POPUNDER.src;
       document.body.appendChild(script);
     }, wait);
